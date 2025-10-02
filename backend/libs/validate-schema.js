@@ -32,3 +32,13 @@ export const projectSchema = z.object({
     link: z.string().optional(),
     image: z.string().optional()
 })
+
+export const aboutSchema = z.object({
+    heroTitle: z.string().min(3, {message: 'Name must be at least 3 characters long'}),
+    heroDescription: z.string().min(3, {message: 'Name must be at least 3 characters long'}),
+    aboutDescription: z.string().min(3, {message: 'Name must be at least 3 characters long'}),
+    projectsCompleted: z.number().min(1, {message: 'projects completed must be at least 1 characters long'}),
+    yearsOfExperience: z.number().min(1, {message: 'years of experience must be at least 1 characters long'}),
+    heroImage: z.string(),
+    workImage: z.string()
+})
