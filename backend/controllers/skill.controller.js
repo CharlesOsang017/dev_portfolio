@@ -2,11 +2,11 @@ import Skill from "../models/skill.model.js";
 
 export const createNewSkill = async (req, res) => {
   try {
-    const { title, percentage, category } = req.body;
+    const { title, description, logo } = req.body;
     const newSkill = await Skill.create({
       title,
-      percentage,
-      category,
+      description,
+      logo,
     });
     await newSkill.save();
     return res.status(201).json({ message: "Skill created successfully" });
@@ -29,7 +29,7 @@ export const allSkills = async (req, res) => {
 export const deleteSkill = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedSkill = await Skill.findByIdAndDelete(id);
+    await Skill.findByIdAndDelete(id);
     return res.status(200).json({ message: "Skill deleted successfully" });
   } catch (error) {
     console.log("error deleting skill", error.message);

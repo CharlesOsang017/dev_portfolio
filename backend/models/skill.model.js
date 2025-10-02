@@ -6,13 +6,13 @@ const skillSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    percentage: {
-      type: Number,
+    description: {
+      type: String,
       required: true,
     },
-    category: {
+    logo: {
       type: String,
-      default: "Frontend",
+      required: true,
     },
   },
   { timestamps: true }
