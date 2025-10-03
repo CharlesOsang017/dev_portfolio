@@ -8,6 +8,7 @@ import experienceRoute from './routes/experience.route.js'
 import projectRoute from './routes/project.route.js'
 import aboutRoute from './routes/about.route.js'
 import cookieParser from 'cookie-parser';
+import { v2 as cloudinary } from "cloudinary";
 
 dotenv.config()
 
@@ -18,6 +19,7 @@ const app = express();
 app.use(cors())
 app.use(express.json())
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
 
 
 //cloudinary configuration

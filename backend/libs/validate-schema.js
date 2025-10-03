@@ -14,13 +14,13 @@ export const loginAdminSchema = z.object({
 
 export const skillsSchema = z.object({
     title: z.string().min(3, {message: 'Name must be at least 3 characters long'}),
-    percentage: z.number().min(0).max(100, {message: 'Percentage must be between 0 and 100'}),
-    category: z.string().optional()
+    description: z.string().min(0).max(100, {message: 'Percentage must be between 0 and 100'}),
+    logo: z.string().min(3, {message: 'Name must be at least 3 characters long'})
 })
 
 export const experienceSchema = z.object({
-    title: z.string().min(3, {message: 'Name must be at least 3 characters long'}),
     company: z.string().min(3, {message: 'Name must be at least 3 characters long'}),
+    role: z.string().min(3, {message: 'Name must be at least 3 characters long'}),
     startDate: z.string(),
     endDate: z.string(),
     description: z.string().min(3, {message: 'Name must be at least 3 characters long'})    

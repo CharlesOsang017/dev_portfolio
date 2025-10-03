@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import About from "../models/about.model.js";
-
+import { v4 as uuidv4 } from "uuid";
 export const createAbout = async (req, res) => {
   try {
     const {
@@ -15,13 +15,21 @@ export const createAbout = async (req, res) => {
     // upload heroImage and workImage to cloudinary
     let heroImageUrl = null;
     if (heroImage) {
-      const uploadResponse = await cloudinary.uploader.upload(thumbnail);
+      const uploadResponse = await cloudinary.uploader.upload(heroImage);
+      // const uploadResponse = await cloudinary.uploader.upload(heroImage, {
+      //   public_id: `heroImage_${uuidv4()}`, // Ensure unique public_id
+      //   folder: "about_images", // Optional: organize in a folder
+      // });
       heroImageUrl = uploadResponse.secure_url;
     }
 
     let workImageUrl = null;
     if (workImage) {
-      const uploadResponse = await cloudinary.uploader.upload(thumbnail);
+      const uploadResponse = await cloudinary.uploader.upload(workImage);
+      // const uploadResponse = await cloudinary.uploader.upload(heroImage, {
+      //   public_id: `heroImage_${uuidv4()}`, // Ensure unique public_id
+      //   folder: "about_images", // Optional: organize in a folder
+      // });
       workImageUrl = uploadResponse.secure_url;
     }
     const newAbout = await About.create({
@@ -45,34 +53,33 @@ export const createAbout = async (req, res) => {
 
 export const updateAbout = async (req, res) => {
   const {
-    heroImage,
     heroTitle,
     heroDescription,
     yearsOfExperience,
     projectsCompleted,
     aboutDescription,
-    workImage,
   } = req.body;
+  let { heroImage, workImage } = req.body;
   try {
     const { id } = req.params;
     const about = await About.findById(id);
     // Handle image upload
     if (heroImage) {
       if (about.heroImage) {
-        const imageId = about.image.split("/").pop().split(".")[0];
+        const imageId = about.heroImage.split("/").pop().split(".")[0];
         await cloudinary.uploader.destroy(imageId);
       }
-      const uploadedResponse = await cloudinary.uploader.upload(image);
-      image = uploadedResponse.secure_url;
+      const uploadedResponse = await cloudinary.uploader.upload(heroImage);
+      heroImage = uploadedResponse.secure_url;
     }
 
     if (workImage) {
       if (about.workImage) {
-        const imageId = about.image.split("/").pop().split(".")[0];
+        const imageId = about.workImage.split("/").pop().split(".")[0];
         await cloudinary.uploader.destroy(imageId);
       }
-      const uploadedResponse = await cloudinary.uploader.upload(image);
-      image = uploadedResponse.secure_url;
+      const uploadedResponse = await cloudinary.uploader.upload(workImage);
+      workImage = uploadedResponse.secure_url;
     }
 
     const updatedAbout = await About.findByIdAndUpdate(

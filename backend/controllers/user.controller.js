@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { generateTokenAndSetCookie } from "../utils/token.js";
 
 export const createAdminUser = async (req, res) => {
   try {
@@ -17,6 +18,8 @@ export const createAdminUser = async (req, res) => {
       email,
       password: hashedPassword,
     });
+    await newUser.save();
+    generateTokenAndSetCookie(newUser?.id, res);
     return res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.log("error creating admin user", error.message);
@@ -40,21 +43,21 @@ export const loginAdminUser = async (req, res) => {
         .status(401)
         .json({ message: "Your email or password is incorrect" });
     }
-    // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-     
+    // // Generate JWT token
+    // const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    //   expiresIn: "7d",
+    // });
+
     await user.save();
 
     const userData = user.toObject();
     delete userData.password;
 
+    generateTokenAndSetCookie(userData?.id, res);
+
     // Return user and token
     return res.status(200).json({
-      message: "Login successful",
-      token,
-      user: userData, 
+      user: userData,
     });
   } catch (error) {
     console.log("error logging in admin user", error.message);

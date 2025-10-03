@@ -1,11 +1,11 @@
 import mongoose from 'mongoose'
 
 const experienceSchema = new mongoose.Schema({
-    role: {
+    company: {
         type: String,
         required: true
     },
-    company: {
+    role: {
         type: String,
         required: true
     },
