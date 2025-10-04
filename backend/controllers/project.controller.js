@@ -54,9 +54,9 @@ export const deleteProject = async (req, res) => {
 export const updateProject = async (req, res) => {
   try {
     const { id } = req.params;
-    const project = await Project.findById(req.params.id);
-    const { title, technologies, link } = req.body;
-    let {image }= req.body;
+    const project = await Project.findById(id);
+    const { title, technologies, link, image } = req.body;
+    // let {image }= req.body;
     
     // Handle image upload
     let imageUrl = null;
