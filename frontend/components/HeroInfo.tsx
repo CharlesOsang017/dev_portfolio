@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 
-const HeroInfo = () => {
+const HeroInfo = ({heroInfo}: any) => {
   const [projectCount, setProjectCount] = useState(0);
   const [yearCount, setYearCount] = useState(0);
 
   useEffect(() => {
-    const projectTarget = 45;
-    const yearTarget = 3;
+    const projectTarget = heroInfo?.projectsCompleted;
+    const yearTarget = heroInfo?.yearsOfExperience;
     const duration = 2000; // 2 seconds
     const incrementTime = 50; // Update every 50ms
 
@@ -57,11 +57,12 @@ const HeroInfo = () => {
       <div className="sm:px-6 md:px-20 px-20 md:mb-30 md:max-w-[69rem] bg-gradient-to-br from-zinc-800 to-gray-900 py-2 md:py-6 rounded-2xl animate-slide-up">
         <div className="max-w-3xl">
           <p className="text-sm sm:text-base md:text-lg text-gray-200">
-            Welcome! I'm Charles Osango, a professional software developer with a
+            {/* Welcome! I'm Charles Osango, a professional software developer with a
             knack for crafting visually stunning and highly functional web
             applications. Combining my passion for coding with my love for design,
             I bring a unique blend of creativity and technical expertise to every
-            project I undertake.
+            project I undertake. */}
+            {heroInfo?.heroDescription}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row md:justify-between items-center py-4 gap-6 sm:gap-4">

@@ -60,36 +60,40 @@ const Skills = () => {
           transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
       `}</style>
-      <div className="py-8 sm:py-12 md:py-16">
-        <div className="px-4 sm:px-6 md:px-8 mb-6 animate-slide-up">
-          <h3 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-white">
+      <div className='py-8 sm:py-12 md:py-16'>
+        <div className='px-4 sm:px-6 md:px-8 mb-6 animate-slide-up'>
+          <h3 className='text-2xl sm:text-3xl md:text-4xl font-semibold text-white'>
             Essential Tools I Use
           </h3>
-          <p className="text-sm sm:text-base md:text-lg text-muted-foreground mt-2">
+          {/* <p className="text-sm sm:text-base md:text-lg text-muted-foreground mt-2">
             Discover the powerful tools and technologies I use to create
             exceptional, high-performing websites and applications
+          </p> */}
+          <p className='text-sm sm:text-base md:text-lg text-muted-foreground mt-2'>
+            Discover the powerful tools and technologies I use to create
+            exceptional, <br /> high-performing websites and applications
           </p>
         </div>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className='max-w-6xl mx-auto px-4 sm:px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6'>
           {skills.map((skill, index) => (
             <div
               key={skill.id}
-              className="flex gap-4 border border-slate-600 rounded-2xl p-4 hover:bg-transparent bg-gray-800 hover-scale animate-slide-up"
+              className='flex gap-4 border border-slate-600 rounded-2xl p-4 hover:bg-transparent bg-gray-800 hover-scale animate-slide-up'
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="border border-slate-600 rounded-2xl p-2 flex-shrink-0">
+              <div className='border border-slate-600 rounded-2xl p-2 flex-shrink-0'>
                 <img
                   width={30}
                   src={skill.logo}
                   alt={skill.title}
-                  className="w-6 sm:w-8 md:w-10 h-auto"
+                  className='w-6 sm:w-8 md:w-10 h-auto'
                 />
               </div>
               <div>
-                <h4 className="ml-2 text-sm sm:text-base font-semibold text-white">
+                <h4 className='ml-2 text-sm sm:text-base font-semibold text-white'>
                   {skill.title}
                 </h4>
-                <p className="ml-2 text-xs sm:text-sm text-gray-400">
+                <p className='ml-2 text-xs sm:text-sm text-gray-400'>
                   {skill.description}
                 </p>
               </div>
