@@ -1,6 +1,44 @@
 import React from "react";
 
 const Experience = () => {
+  const experiences = [
+    {
+      id: 1,
+      company: "Techcop Solutions",
+      role: "Senior Full Stack Developer",
+      startDate: new Date("2022-06-01"),
+      endDate: new Date("2023-09-01"),
+      description: [
+        "Led development of a scalable e-commerce platform using React, Node.js, and MongoDB.",
+        "Optimized application performance, reducing load times by 30%.",
+        "Mentored junior developers and conducted code reviews to ensure quality.",
+      ],
+    },
+    {
+      id: 2,
+      company: "Innovatex Labs",
+      role: "Fronted Developer",
+      startDate: new Date("2021-09-01"),
+      endDate: new Date("2022-06-01"),
+      description: [
+        "Developed responsive web interfaces using React and Tailwind CSS.",
+        "Implemented user authentication and authorization using Firebase.",
+        "Optimized application performance, reducing load times by 30%.",
+      ],
+    },
+    {
+      id: 3,
+      company: "StartUp Dynamics",
+      role: "Junior Software developer",
+      startDate: new Date("2020-09-01"),
+      endDate: new Date("2021-06-01"),
+      description: [
+        "Developed responsive web interfaces using React and Tailwind CSS.",
+        "Implemented user authentication and authorization using Firebase.",
+        "Optimized application performance, reducing load times by 30%.",
+      ],
+    },
+  ];
   return (
     <>
       <style>{`
@@ -49,58 +87,53 @@ const Experience = () => {
           }
         }
       `}</style>
-      <div className="md:px-0 px-7 py-8 sm:py-12 md:py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mb-8 text-center animate-slide-up">
-          <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-           Experience
+      <div className='md:px-0 px-7 py-8 sm:py-12 md:py-16'>
+        <div className='max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mb-8 text-center animate-slide-up'>
+          <h3 className='text-2xl sm:text-3xl md:text-4xl font-bold text-white'>
+            Experience
           </h3>
-          <p className="text-sm sm:text-base md:text-lg text-gray-300 mt-2 max-w-3xl mx-auto">
-            Explore my journey as a software developer, where I’ve built innovative solutions and collaborated with talented teams to deliver impactful projects.
+          <p className='text-sm sm:text-base md:text-lg text-gray-300 mt-2 max-w-3xl mx-auto'>
+            Explore my journey as a software developer, where I’ve built
+            innovative solutions and collaborated with talented teams to deliver
+            impactful projects.
           </p>
         </div>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 relative">
-          <div className="timeline-line" />
-          <div className="flex flex-col gap-6 sm:gap-8">
-            <div className="relative flex flex-col gap-4  border border-slate-600 rounded-2xl p-4 sm:p-6 ml-12 sm:ml-16 hover-scale animate-slide-up" style={{ animationDelay: "0.1s" }}>
-              <div className="timeline-dot" />
-              <div className="w-full">
-                <h4 className="text-base sm:text-lg md:text-xl font-semibold text-white">Senior Full-Stack Developer</h4>
-                <p className="text-sm sm:text-base text-gray-300">TechCorp Solutions</p>
-                <p className="text-xs sm:text-sm text-gray-400">January 2023 – Present</p>
-                <ul className="mt-2 text-sm sm:text-base text-gray-200 list-disc list-inside">
-                  <li>Led development of a scalable e-commerce platform using React, Node.js, and MongoDB.</li>
-                  <li>Optimized application performance, reducing load times by 30%.</li>
-                  <li>Mentored junior developers and conducted code reviews to ensure quality.</li>
-                </ul>
+        <div className='max-w-6xl mx-auto px-4 sm:px-6 md:px-8 relative'>
+          {experiences?.map((experience) => (
+            <>
+              <div className='timeline-line' />
+              <div className='flex flex-col gap-6 m-6 sm:gap-8'>
+                <div
+                  className='relative flex flex-col gap-4  border border-slate-600 rounded-2xl p-4 sm:p-6 ml-12 sm:ml-16 hover-scale animate-slide-up'
+                  style={{ animationDelay: "0.1s" }}
+                >
+                  <div className='timeline-dot' />
+                  <div className='w-full'>
+                    <h4 className='text-base sm:text-lg md:text-xl font-semibold text-white'>
+                      {/* Senior Full-Stack Developer */}
+                      {experience.role}
+                    </h4>
+                    <p className='text-sm sm:text-base text-gray-300'>
+                      {/* TechCorp Solutions */}
+                      {experience.company}
+                    </p>
+                    <p className='text-xs sm:text-sm text-gray-400'>
+                      {experience.startDate.toLocaleDateString()} –{" "}
+                      {experience.endDate.toLocaleDateString()}
+                    </p>
+                    {experience.description?.map((description, index) => (
+                      <ul
+                        key={index}
+                        className='mt-2 text-sm sm:text-base text-gray-200 list-disc list-inside'
+                      >
+                        <li>{description}</li>
+                      </ul>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="relative flex flex-col gap-4  border border-slate-600 rounded-2xl p-4 sm:p-6 ml-12 sm:ml-16 hover-scale animate-slide-up" style={{ animationDelay: "0.2s" }}>
-              <div className="timeline-dot" />
-              <div className="w-full">
-                <h4 className="text-base sm:text-lg md:text-xl font-semibold text-white">Frontend Developer</h4>
-                <p className="text-sm sm:text-base text-gray-300">InnovateX Labs</p>
-                <p className="text-xs sm:text-sm text-gray-400">June 2021 – December 2022</p>
-                <ul className="mt-2 text-sm sm:text-base text-gray-200 list-disc list-inside">
-                  <li>Developed responsive web interfaces using React and Tailwind CSS.</li>
-                  <li>Integrated RESTful APIs to enhance application functionality.</li>
-                  <li>Collaborated with designers to create user-friendly UI/UX designs.</li>
-                </ul>
-              </div>
-            </div>
-            <div className="relative flex flex-col gap-4  border border-slate-600 rounded-2xl p-4 sm:p-6 ml-12 sm:ml-16 hover-scale animate-slide-up" style={{ animationDelay: "0.3s" }}>
-              <div className="timeline-dot" />
-              <div className="w-full">
-                <h4 className="text-base sm:text-lg md:text-xl font-semibold text-white">Junior Software Developer</h4>
-                <p className="text-sm sm:text-base text-gray-300">StartUp Dynamics</p>
-                <p className="text-xs sm:text-sm text-gray-400">March 2020 – May 2021</p>
-                <ul className="mt-2 text-sm sm:text-base text-gray-200 list-disc list-inside">
-                  <li>Built and maintained web applications using JavaScript and Express.js.</li>
-                  <li>Assisted in database design and management with MongoDB.</li>
-                  <li>Contributed to agile development processes and sprint planning.</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+            </>
+          ))}
         </div>
       </div>
     </>
