@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: "Charles Osango | Portfolio",
   description: "Explore the modern portfolio",
   icons: {
-    icon: "/favicon.svg", 
+    icon: "/favicon.svg",
   },
 };
 
@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" >
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
       >

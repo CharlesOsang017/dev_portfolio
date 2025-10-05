@@ -122,19 +122,14 @@ export const updateSkill = async (req, res) => {
       imageUrl = uploadedResponse.secure_url;
     }
 
-    // // update fields
-    // skill.title = title || skill.title;
-    // skill.description = description || skill.description;
-    // skill.logo = logo || skill.logo
-
+    // update fields
     const updatedSkill = await Skill.findByIdAndUpdate(
       id,
       { title, description, logo: imageUrl },
       { new: true }
     );
 
-    // skill.save()
-
+   
     return res.status(200).json(updatedSkill);
   } catch (error) {
     console.log("error updating skill", error.message);
