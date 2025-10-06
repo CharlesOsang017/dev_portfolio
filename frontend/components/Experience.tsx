@@ -100,7 +100,7 @@ const Experience = () => {
         </div>
         <div className='max-w-6xl mx-auto px-4 sm:px-6 md:px-8 relative'>
           {experiences?.map((experience) => (
-            <>
+            <div key={experience.id}>
               <div className='timeline-line' />
               <div className='flex flex-col gap-6 m-6 sm:gap-8'>
                 <div
@@ -132,7 +132,7 @@ const Experience = () => {
                   </div>
                 </div>
               </div>
-            </>
+            </div>
           ))}
         </div>
       </div>

@@ -25,10 +25,10 @@ const ContactPage = () => {
     setSubmitStatus(null);
 
     const form = e.target;
-    const formDataToSubmit = new FormData(form);
+    const formDataToSubmit = new FormData(form as HTMLFormElement);
 
     try {
-      const response = await fetch("https://getform.io/f/bolzwema", {
+      const response = await fetch(process.env.NEXT_PUBLIC_GET_FORM_URL!, {
         method: "POST",
         body: formDataToSubmit,
       });
