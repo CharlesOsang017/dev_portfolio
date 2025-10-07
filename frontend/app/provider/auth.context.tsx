@@ -1,12 +1,8 @@
-// import type { User } from "@/types";
 import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "../types";
 import { useRouter } from "next/navigation";
 import { queryClient } from "./react-query-provider";
-// import { useQueryClient } from "@tanstack/react-query";
-// import { queryClient } from "./react-query-provider";
-// import { useLocation, useNavigate } from "react-router";
-// import { publicRoutes } from "@/lib";
+import Cookies from 'js-cookie';
 
 interface AuthContextType {
   user: User | null;
@@ -23,23 +19,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-
   const router = useRouter();
-//   const queryClient = useQueryClient();
 
-//   const navigate = useNavigate();
-//   const currentPath = useLocation().pathname;
-//   const isPublicRoute = publicRoutes.includes(currentPath);
-
-  // check if user is authenticated
   useEffect(() => {
     const checkAuth = async () => {
       setIsLoading(true);
-      const userInfo = localStorage.getItem("user");
-      if (userInfo) {
+      const token = Cookies.get("token");
+      const userInfo = Cookies.get("user");
+      if (token && userInfo) {
         setUser(JSON.parse(userInfo));
         setIsAuthenticated(true);
-      } 
+      }
       setIsLoading(false);
     };
     checkAuth();
@@ -58,18 +48,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (data: any) => {
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    Cookies.set("token", data.token);
+    Cookies.set("user", JSON.stringify(data.user));
     setUser(data?.user);
     setIsAuthenticated(true);
   };
+
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    Cookies.remove("token");
+    Cookies.remove("user");
     setUser(null);
     setIsAuthenticated(false);
     queryClient.clear();
   };
+
   const values = {
     user,
     isAuthenticated,
