@@ -19,7 +19,7 @@ export const createAdminUser = async (req, res) => {
       password: hashedPassword,
     });
     await newUser.save();
-    generateTokenAndSetCookie(newUser?.id, res);
+    generateTokenAndSetCookie(newUser?._id, res);
     return res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.log("error creating admin user", error.message);
@@ -53,7 +53,7 @@ export const loginAdminUser = async (req, res) => {
     const userData = user.toObject();
     delete userData.password;
 
-    generateTokenAndSetCookie(userData?.id, res);
+    generateTokenAndSetCookie(userData?._id, res);
 
     // Return user and token
     return res.status(200).json({
