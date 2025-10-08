@@ -1,11 +1,11 @@
 // import { postData } from "@/lib/fetch-util"
 // import type { SignInFormData } from "@/routes/auth/sign-in"
 // import type { SignUpFormData } from "@/routes/auth/sign-up"
-import { postData } from "@/lib/fetch-utils"
+import { fetchData, postData } from "@/lib/fetch-utils"
 // import { useMutation } from "@tanstack/react-query"
-import { SignUpFormData } from "../(admin)/section/register/page"
-import { SignInFormData } from "../(admin)/section/login/page"
-import { useMutation } from "@tanstack/react-query"
+import { SignUpFormData } from "../(auth-admin)/auth/register/page"
+import { SignInFormData } from "../(auth-admin)/auth/login/page"
+import { useMutation, useQuery } from "@tanstack/react-query"
 
 export const useSignUpMutation = () => {
     return useMutation({
@@ -16,6 +16,13 @@ export const useSignUpMutation = () => {
 export const useLoginMutation = () => {
     return useMutation({
         mutationFn: (data: SignInFormData) => postData("/user/login", data)
+    })
+}
+
+export const useUserQuery = () => {
+    return useQuery({
+        queryKey: ["user"],
+        queryFn: () => fetchData("/user/me"),
     })
 }
 

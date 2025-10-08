@@ -29,7 +29,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useLoginMutation } from "@/app/hooks/use-auth";
-import { useAuth } from "@/app/provider/auth.context";
+// import { useAuth } from "@/app/provider/auth.context";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -48,13 +48,13 @@ const SignIn = () => {
   });
 
   const { mutate, isPending } = useLoginMutation();
-  const { login } = useAuth();
+  // const { login } = useAuth();
   const handleOnSubmit = (values: SignInFormData) => {
     mutate(values, {
       onSuccess: (data : any) => {
-        login(data);
+        // login(data);
         toast.success("Login successful");
-        router.push("/dashboard");
+        router.push("/section");
       },
       onError: (error: any) => {
         const errorMessage = error?.response?.data?.message;
@@ -150,7 +150,7 @@ const SignIn = () => {
             <div className='flex items-center justify-center'>
               <p className='text-sm text-muted-foreground'>
                 Don&apos;t have an account?{" "}
-                <Link className='text-blue-600' href='/section/register'>
+                <Link className='text-blue-600' href='/auth/register'>
                   Sign Up
                 </Link>
               </p>

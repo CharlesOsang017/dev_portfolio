@@ -59,7 +59,7 @@ const SignUp = () => {
             "Please check your email to verify your account. If you haven't received the email, please check your spam folder.",
         });
         form.reset();
-        router.push("/section/login");
+        router.push("/auth/login");
       },
       onError: (error: any) => {
         const errorMessage = error?.response?.data?.message;
@@ -196,7 +196,7 @@ const SignUp = () => {
             <div className='flex items-center justify-center'>
               <p className='text-sm text-muted-foreground'>
                 Already have an account?{" "}
-                <Link className='text-blue-600' href='/section/login'>
+                <Link className='text-blue-600' href='/auth/login'>
                   Sign In
                 </Link>
               </p>
