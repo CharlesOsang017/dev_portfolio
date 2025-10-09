@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, LogOut, Router } from "lucide-react";
+// import { useLogoutMutation } from "@/app/hooks/use-auth";
+import { toast } from "sonner";
 
 const AdminNav = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,17 +20,19 @@ const AdminNav = () => {
     { name: "Skills", path: "/section/skills" },
   ];
 
+  // const {mutate: logout, isPending} = useLogoutMutation();
+
   const handleLogout = () => {
-    // Add your logout logic here
-    router.push("/section/login");
-    console.log("Logout clicked");
-    // Example: router.push('/login');
+    // logout();
+    router.push("/auth/login");
+    toast.success("Logout successful");
+
   };
 
   return (
     <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
-      <div className="hidden md:flex fixed inset-y-0 left-0 bg-gray-900 text-white w-64 flex-col z-50">
+      <div className="hidden md:flex fixed inset-y-0 left-0 bg-gray-900 text-white w-44 flex-col z-50">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-2xl font-bold">Menu</h2>
         </div>

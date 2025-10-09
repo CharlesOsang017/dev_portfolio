@@ -28,10 +28,12 @@ import { toast } from "sonner";
 // import { useAuth } from "@/provider/auth-context";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { useLoginMutation } from "@/app/hooks/use-auth";
+// import { useLoginMutation } from "@/app/hooks/use-auth";
 // import { useAuth } from "@/app/provider/auth.context";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/fetch-utils";
 
 export type SignInFormData = z.infer<typeof signInSchema>;
 const SignIn = () => {
@@ -47,20 +49,24 @@ const SignIn = () => {
     },
   });
 
-  const { mutate, isPending } = useLoginMutation();
+  // const { mutate, isPending } = useLoginMutation();
   // const { login } = useAuth();
+
+  const {mutate, isPending} = useMutation({
+    mutationFn: (data: SignInFormData)=>{
+      return api.post("/user/login", data);
+    },
+    onSuccess: () => {   
+      toast.success("Login successful");
+      router.push("/section");
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message;
+      toast.error(errorMessage || "Something went wrong");
+    },
+  });
   const handleOnSubmit = (values: SignInFormData) => {
-    mutate(values, {
-      onSuccess: (data : any) => {
-        // login(data);
-        toast.success("Login successful");
-        router.push("/section");
-      },
-      onError: (error: any) => {
-        const errorMessage = error?.response?.data?.message;
-        toast.error(errorMessage || "Something went wrong");
-      },
-    });
+    mutate(values);
   };
   return (
     <div className='min-h-screen flex flex-col items-center justify-center bg-muted/40 p-4'>

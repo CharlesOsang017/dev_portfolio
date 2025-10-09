@@ -28,7 +28,9 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useSignUpMutation } from "@/app/hooks/use-auth";
+import { useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/fetch-utils";
+// import { useSignUpMutation } from "@/app/hooks/use-auth";
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 const SignUp = () => {
@@ -49,23 +51,23 @@ const SignUp = () => {
     },
   });
 
-  const { mutate, isPending } = useSignUpMutation();
+  const { mutate, isPending} = useMutation({
+    mutationFn: async(data: SignUpFormData) =>{
+      return await api.post("/user/register", data);
+    },
+    onSuccess: () => {
+      toast.success("User registered successfully");
+      form.reset();
+      router.push("/auth/login");
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message;
+      toast.error(errorMessage || "Something went wrong");
+    },
+  });
 
   const handleOnSubmit = (values: SignUpFormData) => {
-    mutate(values, {
-      onSuccess: () => {
-        toast.success("Email Verification Required", {
-          description:
-            "Please check your email to verify your account. If you haven't received the email, please check your spam folder.",
-        });
-        form.reset();
-        router.push("/auth/login");
-      },
-      onError: (error: any) => {
-        const errorMessage = error?.response?.data?.message;
-        toast.error(errorMessage || "Something went wrong");
-      },
-    });
+    mutate(values);
   };
   return (
     <div className='min-h-screen flex flex-col items-center justify-center bg-muted/40 p-4'>

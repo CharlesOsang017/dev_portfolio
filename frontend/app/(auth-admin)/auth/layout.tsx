@@ -3,6 +3,7 @@ import React from "react";
 import "../../globals.css";
 
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const queryClient = new QueryClient();
@@ -16,6 +17,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <main className='flex-1 pt-0 px-4 sm:px-6 lg:mx-auto lg:max-w-3xl md:ml-[256px]'>
               {children}
             </main>
+            <Toaster position='bottom-right' richColors />
           </div>
         </body>
       </html>
