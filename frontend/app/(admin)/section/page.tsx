@@ -8,6 +8,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 
 // Dummy data
 const dummyData = {
@@ -62,13 +69,13 @@ const dummyData = {
     {
       _id: "1",
       title: "JavaScript",
-      description: "Proficient in modern JavaScript (ES6+) and frameworks.",
+      description: "Interaction.",
       logo: "https://via.placeholder.com/50",
     },
     {
       _id: "2",
       title: "Python",
-      description: "Experienced in Python for backend and data analysis.",
+      description: "Backend.",
       logo: "https://via.placeholder.com/50",
     },
   ],
@@ -263,7 +270,7 @@ const Admin = () => {
                         />
                       </div>
                       <div>
-                        <label className='block text-sm font-medium text-gray-700'>
+                        <label className='block text-xsm font-medium  text-gray-700'>
                           Start Date
                         </label>
                         <input
@@ -737,24 +744,31 @@ const Admin = () => {
                     {exp.description}
                   </td>
                   <td className='border border-gray-300 p-2'>
-                    <button
-                      onClick={() => openModal("view", "experiences", exp)}
-                      className='mr-2 text-green-500 hover:underline'
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => openModal("update", "experiences", exp)}
-                      className='mr-2 text-blue-500 hover:underline'
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => openModal("delete", "experiences", exp)}
-                      className='text-red-500 hover:underline'
-                    >
-                      Delete
-                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <MoreHorizontal className='h-5 w-5 text-gray-500 hover:text-gray-700' />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem
+                          onClick={() => openModal("view", "experiences", exp)}
+                          className='text-green-500'
+                        >
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => openModal("update", "experiences", exp)}
+                          className='text-blue-500'
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => openModal("delete", "experiences", exp)}
+                          className='text-red-500'
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))}
@@ -801,24 +815,31 @@ const Admin = () => {
                     {item.yearsOfExperience}
                   </td>
                   <td className='border border-gray-300 p-2'>
-                    <button
-                      onClick={() => openModal("view", "about", item)}
-                      className='mr-2 text-green-500 hover:underline'
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => openModal("update", "about", item)}
-                      className='mr-2 text-blue-500 hover:underline'
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => openModal("delete", "about", item)}
-                      className='text-red-500 hover:underline'
-                    >
-                      Delete
-                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <MoreHorizontal className='h-5 w-5 text-gray-500 hover:text-gray-700' />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem
+                          onClick={() => openModal("view", "about", item)}
+                          className='text-green-500'
+                        >
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => openModal("update", "about", item)}
+                          className='text-blue-500'
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => openModal("delete", "about", item)}
+                          className='text-red-500'
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))}
@@ -864,24 +885,31 @@ const Admin = () => {
                     )}
                   </td>
                   <td className='border border-gray-300 p-2'>
-                    <button
-                      onClick={() => openModal("view", "projects", project)}
-                      className='mr-2 text-green-500 hover:underline'
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => openModal("update", "projects", project)}
-                      className='mr-2 text-blue-500 hover:underline'
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => openModal("delete", "projects", project)}
-                      className='text-red-500 hover:underline'
-                    >
-                      Delete
-                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <MoreHorizontal className='h-5 w-5 text-gray-500 hover:text-gray-700' />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem
+                          onClick={() => openModal("view", "projects", project)}
+                          className='text-green-500'
+                        >
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => openModal("update", "projects", project)}
+                          className='text-blue-500'
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => openModal("delete", "projects", project)}
+                          className='text-red-500'
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))}
@@ -908,24 +936,31 @@ const Admin = () => {
                     {skill.description}
                   </td>
                   <td className='border border-gray-300 p-2'>
-                    <button
-                      onClick={() => openModal("view", "skills", skill)}
-                      className='mr-2 text-green-500 hover:underline'
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => openModal("update", "skills", skill)}
-                      className='mr-2 text-blue-500 hover:underline'
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => openModal("delete", "skills", skill)}
-                      className='text-red-500 hover:underline'
-                    >
-                      Delete
-                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <MoreHorizontal className='h-5 w-5 text-gray-500 hover:text-gray-700' />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem
+                          onClick={() => openModal("view", "skills", skill)}
+                          className='text-green-500'
+                        >
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => openModal("update", "skills", skill)}
+                          className='text-blue-500'
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => openModal("delete", "skills", skill)}
+                          className='text-red-500'
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))}

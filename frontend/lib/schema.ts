@@ -14,3 +14,12 @@ export const signInSchema = z.object({
     email: z.string().email("Email is required"),
     password: z.string().min(6, 'password is required')
 })
+
+
+export const experienceSchema = z.object({
+    role: z.string().min(3, 'role is required'),
+    company: z.string().min(3, 'company is required'),
+    startDate: z.string().min(3, 'start date is required'),
+    endDate: z.string().min(3, 'end date is required'),
+    description: z.string().min(3, 'description is required')
+})
