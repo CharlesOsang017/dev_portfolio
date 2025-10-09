@@ -68,37 +68,7 @@ const SkillForm = () => {
 
   // Handle form submission
   const onSubmit = async (data: SkillData) => {
-    setError("");
-    setSuccess("");
-    setLoading(true);
 
-    // Client-side validation for logo
-    if (!data.logo) {
-      setError("Skill logo is required.");
-      setLoading(false);
-      return;
-    }
-
-    // Create FormData for multipart/form-data request
-    const formData = new FormData();
-    formData.append("title", data.title);
-    formData.append("description", data.description);
-    formData.append("logo", data.logo);
-
-    try {
-      // Send POST request to the API
-      const response = await axios.post("/api/skills", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setSuccess("Skill saved successfully!");
-      // Reset form
-      form.reset();
-      setLogoPreview(null);
-    } catch (err) {
-      setError("Failed to save skill. Please try again.");
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (

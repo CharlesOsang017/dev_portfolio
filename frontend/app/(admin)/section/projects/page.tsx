@@ -1,102 +1,101 @@
-'use client';
-import React, { useState } from 'react';
-import axios from 'axios';
+"use client";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button"; // Assuming you have a Button component from @shadcn/ui
+import axios from "axios";
+import { useState } from "react";
+
+// Define the Zod schema for form validation
+const projectSchema = z.object({
+  title: z.string().min(1, { message: "Project title is required" }),
+  technologies: z
+    .string()
+    .min(1, { message: "At least one technology is required" })
+    .refine(
+      (value) => value.split(",").map((tech) => tech.trim()).filter((tech) => tech).length > 0,
+      { message: "Please provide at least one valid technology" }
+    ),
+  link: z
+    .string()
+    .optional()
+    .refine((value) => !value || /^https?:\/\/[^\s$.?#].[^\s]*$/.test(value), {
+      message: "Please provide a valid URL for the link",
+    }),
+  image: z
+    .instanceof(File)
+    .optional()
+    .refine(
+      (file) => !file || ["image/jpeg", "image/png", "image/gif"].includes(file.type),
+      { message: "Please upload a valid image file (JPEG, PNG, or GIF)" }
+    ),
+});
+
+// Infer the TypeScript type from the schema
+export type ProjectData = z.infer<typeof projectSchema>;
 
 const ProjectForm = () => {
-  const [formData, setFormData] = useState({
-    title: '',
-    technologies: '',
-    link: '',
-    image: null,
-  });
-  const [imagePreview, setImagePreview] = useState(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Handle text input changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // Initialize react-hook-form
+  const form = useForm<ProjectData>({
+    resolver: zodResolver(projectSchema),
+    defaultValues: {
+      title: "",
+      technologies: "",
+      link: "",
+      image: undefined,
+    },
+  });
 
-  // Handle file input change
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  // Handle file input change (to update preview and set form value)
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (file: File | undefined) => void
+  ) => {
+    const file = e.target.files?.[0];
     if (file) {
-      // Validate file type
-      const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      if (!validTypes.includes(file.type)) {
-        setError('Please upload a valid image file (JPEG, PNG, or GIF).');
-        return;
-      }
-      setFormData((prev) => ({
-        ...prev,
-        image: file,
-      }));
       setImagePreview(URL.createObjectURL(file));
+      onChange(file);
+    } else {
+      setImagePreview(null);
+      onChange(undefined);
     }
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+  const onSubmit = async (data: ProjectData) => {
+    setError("");
+    setSuccess("");
     setLoading(true);
 
-    // Client-side validation
-    if (!formData.title || !formData.technologies) {
-      setError('Title and technologies are required.');
-      setLoading(false);
-      return;
-    }
-
-    // Validate technologies (ensure at least one technology after splitting)
-    const techArray = formData.technologies
-      .split(',')
+    // Create FormData for multipart/form-data request
+    const formData = new FormData();
+    formData.append("title", data.title);
+    const techArray = data.technologies
+      .split(",")
       .map((tech) => tech.trim())
       .filter((tech) => tech);
-    if (techArray.length === 0) {
-      setError('Please provide at least one technology.');
-      setLoading(false);
-      return;
-    }
-
-    // Validate link if provided
-    if (formData.link && !/^https?:\/\/[^\s$.?#].[^\s]*$/.test(formData.link)) {
-      setError('Please provide a valid URL for the link.');
-      setLoading(false);
-      return;
-    }
-
-    // Create FormData for multipart/form-data request
-    const data = new FormData();
-    data.append('title', formData.title);
-    data.append('technologies', JSON.stringify(techArray)); // Send as JSON string
-    if (formData.link) data.append('link', formData.link);
-    if (formData.image) data.append('image', formData.image);
+    formData.append("technologies", JSON.stringify(techArray));
+    if (data.link) formData.append("link", data.link);
+    if (data.image) formData.append("image", data.image);
 
     try {
       // Send POST request to the API
-      const response = await axios.post('/api/projects', data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const response = await axios.post("/api/projects", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      setSuccess('Project saved successfully!');
+      setSuccess("Project saved successfully!");
       // Reset form
-      setFormData({
-        title: '',
-        technologies: '',
-        link: '',
-        image: null,
-      });
+      form.reset();
       setImagePreview(null);
-      document.getElementById('image').value = '';
     } catch (err) {
-      setError('Failed to save project. Please try again.');
+      setError("Failed to save project. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -110,92 +109,93 @@ const ProjectForm = () => {
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         {success && <p className="text-green-500 text-center mb-4">{success}</p>}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-              Project Title
-            </label>
-            <input
-              type="text"
-              id="title"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Title */}
+            <FormField
+              control={form.control}
               name="title"
-              value={formData.title}
-              onChange={handleChange}
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Enter project title"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter project title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          {/* Technologies */}
-          <div>
-            <label htmlFor="technologies" className="block text-sm font-medium text-gray-700">
-              Technologies (comma-separated)
-            </label>
-            <input
-              type="text"
-              id="technologies"
+            {/* Technologies */}
+            <FormField
+              control={form.control}
               name="technologies"
-              value={formData.technologies}
-              onChange={handleChange}
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="e.g., React, Node.js, MongoDB"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Technologies (comma-separated)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., React, Node.js, MongoDB"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          {/* Link */}
-          <div>
-            <label htmlFor="link" className="block text-sm font-medium text-gray-700">
-              Project Link (Optional)
-            </label>
-            <input
-              type="url"
-              id="link"
+            {/* Link */}
+            <FormField
+              control={form.control}
               name="link"
-              value={formData.link}
-              onChange={handleChange}
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="https://example.com"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project Link (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com" type="url" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          {/* Image */}
-          <div>
-            <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-              Project Image (Optional)
-            </label>
-            <input
-              type="file"
-              id="image"
+            {/* Image */}
+            <FormField
+              control={form.control}
               name="image"
-              accept="image/jpeg,image/png,image/gif"
-              onChange={handleFileChange}
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+              render={({ field: { onChange, value, ...field } }) => (
+                <FormItem>
+                  <FormLabel>Project Image (Optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif"
+                      onChange={(e) => handleFileChange(e, onChange)}
+                      {...field}
+                    />
+                  </FormControl>
+                  {imagePreview && (
+                    <img
+                      src={imagePreview}
+                      alt="Project Preview"
+                      className="mt-2 w-full h-40 object-cover rounded-md"
+                    />
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {imagePreview && (
-              <img
-                src={imagePreview}
-                alt="Project Preview"
-                className="mt-2 w-full h-40 object-cover rounded-md"
-              />
-            )}
-          </div>
 
-          {/* Submit Button */}
-          <div>
-            <button
+            {/* Submit Button */}
+            <Button
               type="submit"
               disabled={loading}
-              className={`w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                loading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className={`w-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              {loading ? 'Saving...' : 'Save Project'}
-            </button>
-          </div>
-        </form>
+              {loading ? "Saving..." : "Save Project"}
+            </Button>
+          </form>
+        </Form>
       </div>
     </div>
   );
