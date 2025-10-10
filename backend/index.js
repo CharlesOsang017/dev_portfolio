@@ -32,7 +32,7 @@ cloudinary.config({
 
 // routes
 app.use("/api/v1/user", userRoute)
-app.use('/api/v1/skill', skillRoute)
+app.use("/api/v1/skill", skillRoute)
 app.use('/api/v1/experience', experienceRoute)
 app.use('/api/v1/project', projectRoute)
 app.use("/api/v1/about", aboutRoute)

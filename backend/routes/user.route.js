@@ -10,7 +10,7 @@ import {
   getLoggedInAdmin,
   logoutAdminUser,
 } from "../controllers/user.controller.js";
-import { authMiddleware } from "../middleware/auth.middleware.js";
+// import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -26,7 +26,7 @@ router.post(
   loginAdminUser
 );
 
-router.get("/me", authMiddleware, getLoggedInAdmin);
+router.get("/me",  getLoggedInAdmin);
 router.post("/logout", logoutAdminUser);
 
 export default router;
