@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { use, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,32 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/fetch-utils";
+
+
+
+// const { } = useQueries({
+//   queries: [
+//     {
+//       queryKey: ["experiences"],
+//       queryFn: () => api.get("/experiences"), 
+
+//     },
+//     {
+//       queryKey: ["about"],
+//       queryFn: () => api.get("/about"),
+//     },
+//     {
+//       queryKey: ["projects"],
+//       queryFn: () => api.get("/projects"),
+//     },
+//     {
+//       queryKey: ["skills"],
+//       queryFn: () => api.get("/skills"),
+//     },
+//   ],
+// })
 
 // Dummy data
 const dummyData = {
@@ -91,6 +117,16 @@ const Admin = () => {
   const [success, setSuccess] = useState("");
 
   // Handle edit form changes
+
+  const { data: skills, isLoading } = useQuery({
+    queryKey: ["skills"],
+    queryFn: async() => {
+      const response = await api.get("/skill");
+      return response.data;
+    },  
+  })
+  
+
   const handleEditChange = (e) => {
     const { name, value, files } = e.target;
     if (files) {
@@ -929,7 +965,7 @@ const Admin = () => {
               </tr>
             </thead>
             <tbody>
-              {data.skills.map((skill) => (
+              {skills?.map((skill: any) => (
                 <tr key={skill._id}>
                   <td className='border border-gray-300 p-2'>{skill.title}</td>
                   <td className='border border-gray-300 p-2'>
