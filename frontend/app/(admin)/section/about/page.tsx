@@ -2,12 +2,32 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; // Assuming you have a Textarea component from @shadcn/ui
-import { Button } from "@/components/ui/button"; // Assuming you have a Button component from @shadcn/ui
-import axios from "axios";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/fetch-utils";
+import { toast } from "sonner";
+import { X } from "lucide-react";
+
+// Utility function to convert File to base64
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 // Define the Zod schema for form validation
 const aboutSchema = z.object({
@@ -15,29 +35,33 @@ const aboutSchema = z.object({
     .instanceof(File)
     .refine(
       (file) => ["image/jpeg", "image/png", "image/gif"].includes(file.type),
-      { message: "Please upload a valid image file (JPEG, PNG, or GIF) for Hero Image" }
+      {
+        message:
+          "Please upload a valid image file (JPEG, PNG, or GIF) for Hero Image",
+      }
     ),
   workImage: z
     .instanceof(File)
     .refine(
       (file) => ["image/jpeg", "image/png", "image/gif"].includes(file.type),
-      { message: "Please upload a valid image file (JPEG, PNG, or GIF) for Work Image" }
+      {
+        message:
+          "Please upload a valid image file (JPEG, PNG, or GIF) for Work Image",
+      }
     ),
   heroTitle: z.string().min(1, { message: "Hero title is required" }),
-  heroDescription: z.string().min(1, { message: "Hero description is required" }),
-  aboutDescription: z.string().min(1, { message: "About description is required" }),
+  heroDescription: z
+    .string()
+    .min(1, { message: "Hero description is required" }),
+  aboutDescription: z
+    .string()
+    .min(1, { message: "About description is required" }),
   projectsCompleted: z
-    .string()
-    .min(1, { message: "Projects completed is required" })
-    .refine((value) => !isNaN(Number(value)) && Number(value) >= 0, {
-      message: "Projects completed must be a valid number",
-    }),
+    .number({ message: "Projects completed must be a number" })
+    .min(0, { message: "Projects completed must be a non-negative number" }),
   yearsOfExperience: z
-    .string()
-    .min(1, { message: "Years of experience is required" })
-    .refine((value) => !isNaN(Number(value)) && Number(value) >= 0, {
-      message: "Years of experience must be a valid number",
-    }),
+    .number({ message: "Years of experience must be a number" })
+    .min(0, { message: "Years of experience must be a non-negative number" }),
 });
 
 // Infer the TypeScript type from the schema
@@ -48,9 +72,6 @@ const AboutForm = () => {
     heroImage: string | null;
     workImage: string | null;
   }>({ heroImage: null, workImage: null });
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
 
   // Initialize react-hook-form
   const form = useForm<AboutData>({
@@ -61,8 +82,8 @@ const AboutForm = () => {
       heroTitle: "",
       heroDescription: "",
       aboutDescription: "",
-      projectsCompleted: "",
-      yearsOfExperience: "",
+      projectsCompleted: 0,
+      yearsOfExperience: 0,
     },
   });
 
@@ -88,45 +109,70 @@ const AboutForm = () => {
     }
   };
 
-  // Handle form submission
-  const onSubmit = async (data: AboutData) => {
-    setError("");
-    setSuccess("");
-    setLoading(true);
+  // Handle clearing a specific image preview
+  const handleClearImage = (fieldName: "heroImage" | "workImage") => {
+    setPreviews((prev) => ({
+      ...prev,
+      [fieldName]: null,
+    }));
+    form.setValue(fieldName, undefined!);
+  };
 
-    // Create FormData for multipart/form-data request
-    const formData = new FormData();
-    formData.append("heroImage", data.heroImage);
-    formData.append("workImage", data.workImage);
-    formData.append("heroTitle", data.heroTitle);
-    formData.append("heroDescription", data.heroDescription);
-    formData.append("aboutDescription", data.aboutDescription);
-    formData.append("projectsCompleted", data.projectsCompleted);
-    formData.append("yearsOfExperience", data.yearsOfExperience);
-
-    try {
-      // Send POST request to the API
-      const response = await axios.post("/api/about", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setSuccess("About data saved successfully!");
-      // Reset form
+  // Define mutation for API call
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (data: {
+      heroImage: string;
+      workImage: string;
+      heroTitle: string;
+      heroDescription: string;
+      aboutDescription: string;
+      projectsCompleted: number;
+      yearsOfExperience: number;
+    }) => {
+      return api.post("/about", data);
+    },
+    onSuccess: () => {
+      toast.success("About content saved successfully!");
       form.reset();
       setPreviews({ heroImage: null, workImage: null });
-    } catch (err) {
-      setError("Failed to save data. Please try again.");
-    } finally {
-      setLoading(false);
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.response?.data?.message || "Failed to save about content";
+      toast.error(errorMessage);
+    },
+  });
+
+  // Handle form submission
+  const onSubmit = async (data: AboutData) => {
+    try {
+      // Convert images to base64
+      const heroImageBase64 = await fileToBase64(data.heroImage);
+      const workImageBase64 = await fileToBase64(data.workImage);
+
+      const submissionData = {
+        heroImage: heroImageBase64,
+        workImage: workImageBase64,
+        heroTitle: data.heroTitle,
+        heroDescription: data.heroDescription,
+        aboutDescription: data.aboutDescription,
+        projectsCompleted: data.projectsCompleted,
+        yearsOfExperience: data.yearsOfExperience,
+      };
+
+      mutate(submissionData);
+    } catch (error) {
+      console.error("Error processing form submission:", error);
+      toast.error("Failed to process the form submission");
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Create About Page Content</h2>
-
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        {success && <p className="text-green-500 text-center mb-4">{success}</p>}
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Create About Page Content
+        </h2>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -141,16 +187,25 @@ const AboutForm = () => {
                     <Input
                       type="file"
                       accept="image/jpeg,image/png,image/gif"
-                      onChange={(e) => handleFileChange(e, onChange, "heroImage")}
+                      onChange={(e) =>
+                        handleFileChange(e, onChange, "heroImage")
+                      }
                       {...field}
                     />
                   </FormControl>
                   {previews.heroImage && (
-                    <img
-                      src={previews.heroImage}
-                      alt="Hero Preview"
-                      className="mt-2 w-full h-40 object-cover rounded-md"
-                    />
+                    <div className="relative">
+                      <X
+                        className="absolute top-2 right-2 cursor-pointer"
+                        onClick={() => handleClearImage("heroImage")}
+                        aria-label="Clear Hero Image"
+                      />
+                      <img
+                        src={previews.heroImage}
+                        alt="Hero Preview"
+                        className="mt-2 w-full h-40 object-cover rounded-md"
+                      />
+                    </div>
                   )}
                   <FormMessage />
                 </FormItem>
@@ -168,16 +223,25 @@ const AboutForm = () => {
                     <Input
                       type="file"
                       accept="image/jpeg,image/png,image/gif"
-                      onChange={(e) => handleFileChange(e, onChange, "workImage")}
+                      onChange={(e) =>
+                        handleFileChange(e, onChange, "workImage")
+                      }
                       {...field}
                     />
                   </FormControl>
                   {previews.workImage && (
-                    <img
-                      src={previews.workImage}
-                      alt="Work Preview"
-                      className="mt-2 w-full h-40 object-cover rounded-md"
-                    />
+                    <div className="relative">
+                      <X
+                        className="absolute top-2 right-2 cursor-pointer"
+                        onClick={() => handleClearImage("workImage")}
+                        aria-label="Clear Work Image"
+                      />
+                      <img
+                        src={previews.workImage}
+                        alt="Work Preview"
+                        className="mt-2 w-full h-40 object-cover rounded-md"
+                      />
+                    </div>
                   )}
                   <FormMessage />
                 </FormItem>
@@ -218,7 +282,7 @@ const AboutForm = () => {
               )}
             />
 
-            /* About Description */
+            {/* About Description */}
             <FormField
               control={form.control}
               name="aboutDescription"
@@ -249,7 +313,12 @@ const AboutForm = () => {
                       type="number"
                       placeholder="Enter number of projects"
                       min="0"
-                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : undefined
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -269,7 +338,12 @@ const AboutForm = () => {
                       type="number"
                       placeholder="Enter years of experience"
                       min="0"
-                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : undefined
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -280,10 +354,12 @@ const AboutForm = () => {
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={loading}
-              className={`w-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+              disabled={isPending}
+              className={`w-full ${
+                isPending ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
-              {loading ? "Saving..." : "Save About Content"}
+              {isPending ? "Saving..." : "Save About Content"}
             </Button>
           </form>
         </Form>
