@@ -101,3 +101,13 @@ export const updateAbout = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+export const getAbout = async(req, res)=>{
+  try {
+    const about = await About.findOne({});
+    return res.status(200).json(about);
+  } catch (error) {
+    console.log("error getting about", error.message);
+    return res.status(500).json({ message: error.message });
+  }
+}

@@ -56,8 +56,8 @@ interface Experience {
 
 interface About {
   _id: string;
-  heroImage: string;
-  workImage: string;
+  heroImage?: string;
+  workImage?: string;
   heroTitle: string;
   heroDescription: string;
   aboutDescription: string;
@@ -70,11 +70,21 @@ type EditData =
   | { section: "skill"; data: Skill }
   | { section: "project"; data: Project }
   | { section: "experience"; data: Experience }
-  | { section: "about"; data: About }
+  | { section: "aboutInfo"; data: About }
   | { section: null; data: null };
 
 type ModalType = "update" | "delete" | "view" | null;
-type SectionType = "skill" | "project" | "experience" | "about" | null;
+type SectionType = "skill" | "project" | "experience" | "aboutInfo" | null;
+
+// Loader Component
+const Loader = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
+    <div className="flex flex-col items-center">
+      <div className="w-12 h-12 border-4 border-t-indigo-600 border-gray-200 rounded-full animate-spin"></div>
+      <p className="mt-4 text-lg font-semibold text-gray-700">Loading...</p>
+    </div>
+  </div>
+);
 
 const Admin = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -85,7 +95,7 @@ const Admin = () => {
   const queryClient = useQueryClient();
 
   // Fetch data using useQuery
-  const { data: skills } = useQuery<Skill[]>({
+  const { data: skills, isLoading: isLoadingSkills } = useQuery<Skill[]>({
     queryKey: ["skill"],
     queryFn: async () => {
       const response = await api.get("/skill");
@@ -93,7 +103,7 @@ const Admin = () => {
     },
   });
 
-  const { data: projects } = useQuery<Project[]>({
+  const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
     queryKey: ["project"],
     queryFn: async () => {
       const response = await api.get("/project");
@@ -101,7 +111,7 @@ const Admin = () => {
     },
   });
 
-  const { data: experiences } = useQuery<Experience[]>({
+  const { data: experiences, isLoading: isLoadingExperiences } = useQuery<Experience[]>({
     queryKey: ["experience"],
     queryFn: async () => {
       const response = await api.get("/experience");
@@ -109,13 +119,16 @@ const Admin = () => {
     },
   });
 
-  const { data: about } = useQuery<About[]>({
+  const { data: aboutInfo, isLoading: isLoadingAbout } = useQuery<About>({
     queryKey: ["about"],
     queryFn: async () => {
       const response = await api.get("/about");
-      return response.data as About[];
+      return response.data as About;
     },
   });
+
+  // Check if any query is loading
+  const isLoading = isLoadingSkills || isLoadingProjects || isLoadingExperiences || isLoadingAbout;
 
   // Mutation for updating data
   const updateMutation = useMutation({
@@ -129,7 +142,8 @@ const Admin = () => {
       data: Skill | Project | Experience | About;
     }) => {
       if (!section) throw new Error("Section is required");
-      return api.put(`/${section}/${id}`, data);
+      const endpoint = section === "aboutInfo" ? "about" : section;
+      return api.put(`/${endpoint}/${id}`, data);
     },
     onSuccess: (_, { section }) => {
       toast.success(`Successfully updated ${section}.`);
@@ -236,7 +250,7 @@ const Admin = () => {
         toast.error("End date must be after start date.");
         return;
       }
-    } else if (editData.section === "about") {
+    } else if (editData.section === "aboutInfo") {
       const data = editData.data as About;
       if (
         !data.heroTitle ||
@@ -307,49 +321,212 @@ const Admin = () => {
   // Open modal for specific action
   const openModal = (
     type: ModalType,
-    section: "skills" | "projects" | "experiences" | "about",
+    section: "skills" | "projects" | "experiences" | "aboutInfo",
     item: Skill | Project | Experience | About
   ) => {
-    const normalizedSection = section.slice(0, -1) as SectionType;
+    const sectionMap: { [key: string]: SectionType } = {
+      skills: "skill",
+      projects: "project",
+      experiences: "experience",
+      aboutInfo: "aboutInfo",
+    };
+
+    const normalizedSection = sectionMap[section] || section;
+
+    let data: Skill | Project | Experience | About;
+
+    if (normalizedSection === "project") {
+      data = {
+        ...item,
+        technologies: Array.isArray((item as Project).technologies)
+          ? (item as Project).technologies.join(", ")
+          : (item as Project).technologies || "",
+      } as Project;
+    } else {
+      data = { ...item };
+    }
+
     setModalType(type);
     setEditData({
       section: normalizedSection,
-      data: {
-        ...item,
-        technologies:
-          section === "projects" && Array.isArray((item as Project).technologies)
-            ? (item as Project).technologies.join(", ")
-            : (item as Project).technologies,
-      },
+      data,
     });
     setImagePreviews({
-      heroImage: section === "about" ? (item as About).heroImage : null,
-      workImage: section === "about" ? (item as About).workImage : null,
-      image: section === "projects" ? (item as Project).image : null,
-      logo: section === "skills" ? (item as Skill).logo : null,
+      heroImage: normalizedSection === "aboutInfo" ? (item as About).heroImage || null : null,
+      workImage: normalizedSection === "aboutInfo" ? (item as About).workImage || null : null,
+      image: normalizedSection === "project" ? (item as Project).image || null : null,
+      logo: normalizedSection === "skill" ? (item as Skill).logo || null : null,
     });
     setModalOpen(true);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-4">
-      <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Admin Dashboard</h2>
+    <>
+      {isLoading && <Loader />}
+      <div className={`min-h-screen bg-gray-100 py-10 px-4 ${isLoading ? 'opacity-50' : ''}`}>
+        <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold mb-6 text-center">Admin Dashboard</h2>
 
-        {/* Modal */}
-        <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-          <DialogContent className="sm:max-w-[425px] bg-white p-6 rounded-lg shadow-lg">
-            {modalType === "update" && editData.section && (
-              <>
-                <DialogHeader>
-                  <DialogTitle>Edit {editData.section}</DialogTitle>
-                  <DialogDescription>
-                    Update the details below.
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleUpdateSubmit} className="space-y-4">
-                  {editData.section === "experience" && (
-                    <>
+          {/* Modal */}
+          <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+            <DialogContent className="sm:max-w-[425px] bg-white p-6 rounded-lg shadow-lg">
+              {modalType === "update" && editData.section && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Edit {editData.section}</DialogTitle>
+                    <DialogDescription>
+                      Update the details below.
+                    </DialogDescription>
+                  </DialogHeader>
+                  {editData.section === "aboutInfo" && editData.data ? (
+                    <div className="max-h-[70vh] overflow-y-auto space-y-4">
+                      <form onSubmit={handleUpdateSubmit} className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Hero Image
+                          </label>
+                          <input
+                            type="file"
+                            name="heroImage"
+                            onChange={handleEditChange}
+                            className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                            accept="image/jpeg,image/png,image/gif"
+                          />
+                          {imagePreviews.heroImage && (
+                            <div className="relative">
+                              <X
+                                className="absolute top-2 right-2 cursor-pointer"
+                                onClick={() => handleClearImage("heroImage")}
+                                aria-label="Clear Hero Image"
+                              />
+                              <img
+                                src={imagePreviews.heroImage}
+                                alt="Hero Preview"
+                                className="mt-2 w-full h-40 object-cover rounded-md"
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Work Image
+                          </label>
+                          <input
+                            type="file"
+                            name="workImage"
+                            onChange={handleEditChange}
+                            className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                            accept="image/jpeg,image/png,image/gif"
+                          />
+                          {imagePreviews.workImage && (
+                            <div className="relative">
+                              <X
+                                className="absolute top-2 right-2 cursor-pointer"
+                                onClick={() => handleClearImage("workImage")}
+                                aria-label="Clear Work Image"
+                              />
+                              <img
+                                src={imagePreviews.workImage}
+                                alt="Work Preview"
+                                className="mt-2 w-full h-40 object-cover rounded-md"
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Hero Title
+                          </label>
+                          <input
+                            type="text"
+                            name="heroTitle"
+                            value={(editData.data as About).heroTitle || ""}
+                            onChange={handleEditChange}
+                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Hero Description
+                          </label>
+                          <textarea
+                            name="heroDescription"
+                            value={(editData.data as About).heroDescription || ""}
+                            onChange={handleEditChange}
+                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            rows={4}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            About Description
+                          </label>
+                          <textarea
+                            name="aboutDescription"
+                            value={(editData.data as About).aboutDescription || ""}
+                            onChange={handleEditChange}
+                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            rows={4}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Projects Completed
+                          </label>
+                          <input
+                            type="number"
+                            name="projectsCompleted"
+                            value={(editData.data as About).projectsCompleted ?? ""}
+                            onChange={handleEditChange}
+                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            required
+                            min="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Years of Experience
+                          </label>
+                          <input
+                            type="number"
+                            name="yearsOfExperience"
+                            value={(editData.data as About).yearsOfExperience ?? ""}
+                            onChange={handleEditChange}
+                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            required
+                            min="0"
+                          />
+                        </div>
+                        <DialogFooter>
+                          <button
+                            type="submit"
+                            disabled={updateMutation.isPending}
+                            className={`py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                              updateMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                          >
+                            {updateMutation.isPending ? "Updating..." : "Update"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setModalOpen(false)}
+                            className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                          >
+                            Cancel
+                          </button>
+                        </DialogFooter>
+                      </form>
+                    </div>
+                  ) : (
+                    editData.section === "aboutInfo" && !editData.data && (
+                      <p>No data available</p>
+                    )
+                  )}
+                  {editData.section === "experience" && editData.data && (
+                    <form onSubmit={handleUpdateSubmit} className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
                           Company
@@ -415,133 +592,28 @@ const Admin = () => {
                           required
                         />
                       </div>
-                    </>
+                      <DialogFooter>
+                        <button
+                          type="submit"
+                          disabled={updateMutation.isPending}
+                          className={`py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                            updateMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                        >
+                          {updateMutation.isPending ? "Updating..." : "Update"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setModalOpen(false)}
+                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                        >
+                          Cancel
+                        </button>
+                      </DialogFooter>
+                    </form>
                   )}
-                  {editData.section === "about" && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Hero Image
-                        </label>
-                        <input
-                          type="file"
-                          name="heroImage"
-                          onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-                          accept="image/jpeg,image/png,image/gif"
-                        />
-                        {imagePreviews.heroImage && (
-                          <div className="relative">
-                            <X
-                              className="absolute top-2 right-2 cursor-pointer"
-                              onClick={() => handleClearImage("heroImage")}
-                              aria-label="Clear Hero Image"
-                            />
-                            <img
-                              src={imagePreviews.heroImage}
-                              alt="Hero Preview"
-                              className="mt-2 w-full h-40 object-cover rounded-md"
-                            />
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Work Image
-                        </label>
-                        <input
-                          type="file"
-                          name="workImage"
-                          onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-                          accept="image/jpeg,image/png,image/gif"
-                        />
-                        {imagePreviews.workImage && (
-                          <div className="relative">
-                            <X
-                              className="absolute top-2 right-2 cursor-pointer"
-                              onClick={() => handleClearImage("workImage")}
-                              aria-label="Clear Work Image"
-                            />
-                            <img
-                              src={imagePreviews.workImage}
-                              alt="Work Preview"
-                              className="mt-2 w-full h-40 object-cover rounded-md"
-                            />
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Hero Title
-                        </label>
-                        <input
-                          type="text"
-                          name="heroTitle"
-                          value={(editData.data as About).heroTitle || ""}
-                          onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Hero Description
-                        </label>
-                        <textarea
-                          name="heroDescription"
-                          value={(editData.data as About).heroDescription || ""}
-                          onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                          rows={4}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          About Description
-                        </label>
-                        <textarea
-                          name="aboutDescription"
-                          value={(editData.data as About).aboutDescription || ""}
-                          onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                          rows={4}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Projects Completed
-                        </label>
-                        <input
-                          type="number"
-                          name="projectsCompleted"
-                          value={(editData.data as About).projectsCompleted ?? ""}
-                          onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                          required
-                          min="0"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Years of Experience
-                        </label>
-                        <input
-                          type="number"
-                          name="yearsOfExperience"
-                          value={(editData.data as About).yearsOfExperience ?? ""}
-                          onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                          required
-                          min="0"
-                        />
-                      </div>
-                    </>
-                  )}
-                  {editData.section === "project" && (
-                    <>
+                  {editData.section === "project" && editData.data && (
+                    <form onSubmit={handleUpdateSubmit} className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
                           Title
@@ -562,7 +634,11 @@ const Admin = () => {
                         <input
                           type="text"
                           name="technologies"
-                          value={(editData.data as Project).technologies || ""}
+                          value={
+                            typeof (editData.data as Project).technologies === "string"
+                              ? (editData.data as Project).technologies
+                              : (editData.data as Project).technologies.join(", ") || ""
+                          }
                           onChange={handleEditChange}
                           className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                           required
@@ -606,10 +682,28 @@ const Admin = () => {
                           </div>
                         )}
                       </div>
-                    </>
+                      <DialogFooter>
+                        <button
+                          type="submit"
+                          disabled={updateMutation.isPending}
+                          className={`py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                            updateMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                        >
+                          {updateMutation.isPending ? "Updating..." : "Update"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setModalOpen(false)}
+                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                        >
+                          Cancel
+                        </button>
+                      </DialogFooter>
+                    </form>
                   )}
-                  {editData.section === "skill" && (
-                    <>
+                  {editData.section === "skill" && editData.data && (
+                    <form onSubmit={handleUpdateSubmit} className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
                           Title
@@ -662,139 +756,159 @@ const Admin = () => {
                           </div>
                         )}
                       </div>
-                    </>
+                      <DialogFooter>
+                        <button
+                          type="submit"
+                          disabled={updateMutation.isPending}
+                          className={`py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                            updateMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                        >
+                          {updateMutation.isPending ? "Updating..." : "Update"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setModalOpen(false)}
+                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                        >
+                          Cancel
+                        </button>
+                      </DialogFooter>
+                    </form>
                   )}
+                </>
+              )}
+              {modalType === "delete" && editData.section && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Delete {editData.section}</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to delete this {editData.section} entry? This action cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
                   <DialogFooter>
                     <button
-                      type="submit"
-                      disabled={updateMutation.isPending}
-                      className={`py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                        updateMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
+                      onClick={handleDelete}
+                      disabled={deleteMutation.isPending}
+                      className={`py-2 px-4 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                        deleteMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                     >
-                      {updateMutation.isPending ? "Updating..." : "Update"}
+                      {deleteMutation.isPending ? "Deleting..." : "Delete"}
                     </button>
                     <button
-                      type="button"
                       onClick={() => setModalOpen(false)}
                       className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
                     >
                       Cancel
                     </button>
                   </DialogFooter>
-                </form>
-              </>
-            )}
-            {modalType === "delete" && editData.section && (
-              <>
-                <DialogHeader>
-                  <DialogTitle>Delete {editData.section}</DialogTitle>
-                  <DialogDescription>
-                    Are you sure you want to delete this {editData.section} entry? This action cannot be undone.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <button
-                    onClick={handleDelete}
-                    disabled={deleteMutation.isPending}
-                    className={`py-2 px-4 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                      deleteMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {deleteMutation.isPending ? "Deleting..." : "Delete"}
-                  </button>
-                  <button
-                    onClick={() => setModalOpen(false)}
-                    className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
-                  >
-                    Cancel
-                  </button>
-                </DialogFooter>
-              </>
-            )}
-            {modalType === "view" && editData.section && (
-              <>
-                <DialogHeader>
-                  <DialogTitle>View {editData.section} Details</DialogTitle>
-                  <DialogDescription>
-                    Details of the selected entry.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  {editData.section === "experience" && (
-                    <>
+                </>
+              )}
+              {modalType === "view" && editData.section && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>View {editData.section} Details</DialogTitle>
+                    <DialogDescription>
+                      Details of the selected entry.
+                    </DialogDescription>
+                  </DialogHeader>
+                  {editData.section === "aboutInfo" && editData.data ? (
+                    <div className="max-h-[70vh] overflow-y-auto space-y-4">
+                      <div className="space-y-4">
+                        <p>
+                          <strong>Hero Title:</strong> {(editData.data as About).heroTitle || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Hero Description:</strong>{" "}
+                          {(editData.data as About).heroDescription || "N/A"}
+                        </p>
+                        <p>
+                          <strong>About Description:</strong>{" "}
+                          {(editData.data as About).aboutDescription || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Projects Completed:</strong>{" "}
+                          {(editData.data as About).projectsCompleted ?? "N/A"}
+                        </p>
+                        <p>
+                          <strong>Years of Experience:</strong>{" "}
+                          {(editData.data as About).yearsOfExperience ?? "N/A"}
+                        </p>
+                        {(editData.data as About).heroImage && (
+                          <div>
+                            <strong>Hero Image:</strong>
+                            <img
+                              src={(editData.data as About).heroImage}
+                              alt="Hero Preview"
+                              className="mt-2 w-full h-40 object-cover rounded-md"
+                            />
+                          </div>
+                        )}
+                        {(editData.data as About).workImage && (
+                          <div>
+                            <strong>Work Image:</strong>
+                            <img
+                              src={(editData.data as About).workImage}
+                              alt="Work Preview"
+                              className="mt-2 w-full h-40 object-cover rounded-md"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <DialogFooter>
+                        <button
+                          onClick={() => setModalOpen(false)}
+                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                        >
+                          Close
+                        </button>
+                      </DialogFooter>
+                    </div>
+                  ) : (
+                    editData.section === "aboutInfo" && !editData.data && (
+                      <p>No data available</p>
+                    )
+                  )}
+                  {editData.section === "experience" && editData.data && (
+                    <div className="space-y-4">
                       <p>
-                        <strong>Company:</strong> {(editData.data as Experience).company}
+                        <strong>Company:</strong> {(editData.data as Experience).company || "N/A"}
                       </p>
                       <p>
-                        <strong>Role:</strong> {(editData.data as Experience).role}
+                        <strong>Role:</strong> {(editData.data as Experience).role || "N/A"}
                       </p>
                       <p>
                         <strong>Start Date:</strong>{" "}
-                        {new Date((editData.data as Experience).startDate).toLocaleDateString()}
+                        {new Date((editData.data as Experience).startDate).toLocaleDateString() || "N/A"}
                       </p>
                       <p>
                         <strong>End Date:</strong>{" "}
-                        {new Date((editData.data as Experience).endDate).toLocaleDateString()}
+                        {new Date((editData.data as Experience).endDate).toLocaleDateString() || "N/A"}
                       </p>
                       <p>
-                        <strong>Description:</strong> {(editData.data as Experience).description}
+                        <strong>Description:</strong> {(editData.data as Experience).description || "N/A"}
                       </p>
-                    </>
+                      <DialogFooter>
+                        <button
+                          onClick={() => setModalOpen(false)}
+                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                        >
+                          Close
+                        </button>
+                      </DialogFooter>
+                    </div>
                   )}
-                  {editData.section === "about" && (
-                    <>
+                  {editData.section === "project" && editData.data && (
+                    <div className="space-y-4">
                       <p>
-                        <strong>Hero Title:</strong> {(editData.data as About).heroTitle}
-                      </p>
-                      <p>
-                        <strong>Hero Description:</strong>{" "}
-                        {(editData.data as About).heroDescription}
-                      </p>
-                      <p>
-                        <strong>About Description:</strong>{" "}
-                        {(editData.data as About).aboutDescription}
-                      </p>
-                      <p>
-                        <strong>Projects Completed:</strong>{" "}
-                        {(editData.data as About).projectsCompleted}
-                      </p>
-                      <p>
-                        <strong>Years of Experience:</strong>{" "}
-                        {(editData.data as About).yearsOfExperience}
-                      </p>
-                      {(editData.data as About).heroImage && (
-                        <div>
-                          <strong>Hero Image:</strong>
-                          <img
-                            src={(editData.data as About).heroImage}
-                            alt="Hero Preview"
-                            className="mt-2 w-full h-40 object-cover rounded-md"
-                          />
-                        </div>
-                      )}
-                      {(editData.data as About).workImage && (
-                        <div>
-                          <strong>Work Image:</strong>
-                          <img
-                            src={(editData.data as About).workImage}
-                            alt="Work Preview"
-                            className="mt-2 w-full h-40 object-cover rounded-md"
-                          />
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {editData.section === "project" && (
-                    <>
-                      <p>
-                        <strong>Title:</strong> {(editData.data as Project).title}
+                        <strong>Title:</strong> {(editData.data as Project).title || "N/A"}
                       </p>
                       <p>
                         <strong>Technologies:</strong>{" "}
-                        {Array.isArray((editData.data as Project).technologies)
-                          ? (editData.data as Project).technologies.join(", ")
-                          : (editData.data as Project).technologies}
+                        {typeof (editData.data as Project).technologies === "string"
+                          ? (editData.data as Project).technologies
+                          : (editData.data as Project).technologies.join(", ") || "N/A"}
                       </p>
                       <p>
                         <strong>Link:</strong>{" "}
@@ -821,15 +935,23 @@ const Admin = () => {
                           />
                         </div>
                       )}
-                    </>
+                      <DialogFooter>
+                        <button
+                          onClick={() => setModalOpen(false)}
+                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                        >
+                          Close
+                        </button>
+                      </DialogFooter>
+                    </div>
                   )}
-                  {editData.section === "skill" && (
-                    <>
+                  {editData.section === "skill" && editData.data && (
+                    <div className="space-y-4">
                       <p>
-                        <strong>Title:</strong> {(editData.data as Skill).title}
+                        <strong>Title:</strong> {(editData.data as Skill).title || "N/A"}
                       </p>
                       <p>
-                        <strong>Description:</strong> {(editData.data as Skill).description}
+                        <strong>Description:</strong> {(editData.data as Skill).description || "N/A"}
                       </p>
                       {(editData.data as Skill).logo && (
                         <div>
@@ -841,254 +963,254 @@ const Admin = () => {
                           />
                         </div>
                       )}
-                    </>
+                      <DialogFooter>
+                        <button
+                          onClick={() => setModalOpen(false)}
+                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                        >
+                          Close
+                        </button>
+                      </DialogFooter>
+                    </div>
                   )}
-                </div>
-                <DialogFooter>
-                  <button
-                    onClick={() => setModalOpen(false)}
-                    className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
-                  >
-                    Close
-                  </button>
-                </DialogFooter>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
 
-        {/* Experiences Table */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">Experiences</h3>
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2">Company</th>
-                <th className="border border-gray-300 p-2">Role</th>
-                <th className="border border-gray-300 p-2">Start Date</th>
-                <th className="border border-gray-300 p-2">End Date</th>
-                <th className="border border-gray-300 p-2">Description</th>
-                <th className="border border-gray-300 p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {experiences?.map((exp) => (
-                <tr key={exp._id}>
-                  <td className="border border-gray-300 p-2">{exp.company}</td>
-                  <td className="border border-gray-300 p-2">{exp.role}</td>
-                  <td className="border border-gray-300 p-2">
-                    {new Date(exp.startDate).toLocaleDateString()}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {new Date(exp.endDate).toLocaleDateString()}
-                  </td>
-                  <td className="border border-gray-300 p-2">{exp.description}</td>
-                  <td className="border border-gray-300 p-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem
-                          onClick={() => openModal("view", "experiences", exp)}
-                          className="text-green-500"
-                        >
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => openModal("update", "experiences", exp)}
-                          className="text-blue-500"
-                        >
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => openModal("delete", "experiences", exp)}
-                          className="text-red-500"
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
+          {/* Experiences Table */}
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold mb-4">Experiences</h3>
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-2">Company</th>
+                  <th className="border border-gray-300 p-2">Role</th>
+                  <th className="border border-gray-300 p-2">Start Date</th>
+                  <th className="border border-gray-300 p-2">End Date</th>
+                  <th className="border border-gray-300 p-2">Description</th>
+                  <th className="border border-gray-300 p-2">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {experiences?.map((exp) => (
+                  <tr key={exp._id}>
+                    <td className="border border-gray-300 p-2">{exp.company}</td>
+                    <td className="border border-gray-300 p-2">{exp.role}</td>
+                    <td className="border border-gray-300 p-2">
+                      {new Date(exp.startDate).toLocaleDateString()}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {new Date(exp.endDate).toLocaleDateString()}
+                    </td>
+                    <td className="border border-gray-300 p-2">{exp.description}</td>
+                    <td className="border border-gray-300 p-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem
+                            onClick={() => openModal("view", "experiences", exp)}
+                            className="text-green-500"
+                          >
+                            View
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => openModal("update", "experiences", exp)}
+                            className="text-blue-500"
+                          >
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => openModal("delete", "experiences", exp)}
+                            className="text-red-500"
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        {/* About Table */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">About</h3>
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2">Hero Title</th>
-                <th className="border border-gray-300 p-2">Hero Description</th>
-                <th className="border border-gray-300 p-2">About Description</th>
-                <th className="border border-gray-300 p-2">Projects Completed</th>
-                <th className="border border-gray-300 p-2">Years of Experience</th>
-                <th className="border border-gray-300 p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {about?.map((item) => (
-                <tr key={item._id}>
-                  <td className="border border-gray-300 p-2">{item.heroTitle}</td>
-                  <td className="border border-gray-300 p-2">{item.heroDescription}</td>
-                  <td className="border border-gray-300 p-2">{item.aboutDescription}</td>
-                  <td className="border border-gray-300 p-2">{item.projectsCompleted}</td>
-                  <td className="border border-gray-300 p-2">{item.yearsOfExperience}</td>
-                  <td className="border border-gray-300 p-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem
-                          onClick={() => openModal("view", "about", item)}
-                          className="text-green-500"
-                        >
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => openModal("update", "about", item)}
-                          className="text-blue-500"
-                        >
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => openModal("delete", "about", item)}
-                          className="text-red-500"
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
+          {/* About Table */}
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold mb-4">About</h3>
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-2">Hero Title</th>
+                  <th className="border border-gray-300 p-2">Hero Description</th>
+                  <th className="border border-gray-300 p-2">About Description</th>
+                  <th className="border border-gray-300 p-2">Projects Completed</th>
+                  <th className="border border-gray-300 p-2">Years of Experience</th>
+                  <th className="border border-gray-300 p-2">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {aboutInfo ? (
+                  <tr>
+                    <td className="border border-gray-300 p-2">{aboutInfo.heroTitle || "N/A"}</td>
+                    <td className="border border-gray-300 p-2">{aboutInfo.heroDescription || "N/A"}</td>
+                    <td className="border border-gray-300 p-2">{aboutInfo.aboutDescription || "N/A"}</td>
+                    <td className="border border-gray-300 p-2">{aboutInfo.projectsCompleted ?? "N/A"}</td>
+                    <td className="border border-gray-300 p-2">{aboutInfo.yearsOfExperience ?? "N/A"}</td>
+                    <td className="border border-gray-300 p-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem
+                            onClick={() => openModal("view", "aboutInfo", aboutInfo)}
+                            className="text-green-500"
+                          >
+                            View
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => openModal("update", "aboutInfo", aboutInfo)}
+                            className="text-blue-500"
+                          >
+                            Edit
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="border border-gray-300 p-2 text-center">
+                      No About data available
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Projects Table */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">Projects</h3>
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2">Title</th>
-                <th className="border border-gray-300 p-2">Technologies</th>
-                <th className="border border-gray-300 p-2">Link</th>
-                <th className="border border-gray-300 p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects?.map((project) => (
-                <tr key={project._id}>
-                  <td className="border border-gray-300 p-2">{project.title}</td>
-                  <td className="border border-gray-300 p-2">
-                    {Array.isArray(project.technologies)
-                      ? project.technologies.join(", ")
-                      : project.technologies}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {project.link ? (
-                      <a
-                        href={project.link}
-                        className="text-blue-500 hover:underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Link
-                      </a>
-                    ) : (
-                      "N/A"
-                    )}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem
-                          onClick={() => openModal("view", "projects", project)}
-                          className="text-green-500"
-                        >
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => openModal("update", "projects", project)}
-                          className="text-blue-500"
-                        >
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => openModal("delete", "projects", project)}
-                          className="text-red-500"
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
+          {/* Projects Table */}
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold mb-4">Projects</h3>
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-2">Title</th>
+                  <th className="border border-gray-300 p-2">Technologies</th>
+                  <th className="border border-gray-300 p-2">Link</th>
+                  <th className="border border-gray-300 p-2">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {projects?.map((project) => (
+                  <tr key={project._id}>
+                    <td className="border border-gray-300 p-2">{project.title}</td>
+                    <td className="border border-gray-300 p-2">
+                      {typeof project.technologies === "string"
+                        ? project.technologies
+                        : project.technologies.join(", ")}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {project.link ? (
+                        <a
+                          href={project.link}
+                          className="text-blue-500 hover:underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Link
+                        </a>
+                      ) : (
+                        "N/A"
+                      )}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem
+                            onClick={() => openModal("view", "projects", project)}
+                            className="text-green-500"
+                          >
+                            View
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => openModal("update", "projects", project)}
+                            className="text-blue-500"
+                          >
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => openModal("delete", "projects", project)}
+                            className="text-red-500"
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Skills Table */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Skills</h3>
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2">Title</th>
-                <th className="border border-gray-300 p-2">Description</th>
-                <th className="border border-gray-300 p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {skills?.map((skill) => (
-                <tr key={skill._id}>
-                  <td className="border border-gray-300 p-2">{skill.title}</td>
-                  <td className="border border-gray-300 p-2">{skill.description}</td>
-                  <td className="border border-gray-300 p-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem
-                          onClick={() => openModal("view", "skills", skill)}
-                          className="text-green-500"
-                        >
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => openModal("update", "skills", skill)}
-                          className="text-blue-500"
-                        >
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => openModal("delete", "skills", skill)}
-                          className="text-red-500"
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
+          {/* Skills Table */}
+          <div>
+            <h3 className="text-xl font-semibold mb-4">Skills</h3>
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-2">Title</th>
+                  <th className="border border-gray-300 p-2">Description</th>
+                  <th className="border border-gray-300 p-2">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {skills?.map((skill) => (
+                  <tr key={skill._id}>
+                    <td className="border border-gray-300 p-2">{skill.title}</td>
+                    <td className="border border-gray-300 p-2">{skill.description}</td>
+                    <td className="border border-gray-300 p-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem
+                            onClick={() => openModal("view", "skills", skill)}
+                            className="text-green-500"
+                          >
+                            View
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => openModal("update", "skills", skill)}
+                            className="text-blue-500"
+                          >
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => openModal("delete", "skills", skill)}
+                            className="text-red-500"
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
