@@ -5,6 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
+import { Textarea } from "@/components/ui/textarea";
+import { useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/fetch-utils";
+import { toast } from "sonner";
 
 export type ExperienceData = z.infer<typeof experienceSchema>;
 
@@ -20,9 +24,22 @@ const ExperienceForm = () => {
     },
   });
 
+  const {mutate, isPending} = useMutation({
+    mutationFn: async(data: ExperienceData) =>{
+      return api.post("/experience", data)
+    },
+    onSuccess: ()=>{
+      toast.success("Experience Created Successfully!")
+      form.reset()
+    },
+    onError: (error: any)=>{
+      const errorMessage = error?.response?.data?.message || "Something went wrong";
+      toast.error(errorMessage)
+    }
+  })
+
   const onSubmit = (data: ExperienceData) => {
-    console.log("Form submitted:", data);
-    // Add your submission logic here (e.g., API call)
+    mutate(data)
   };
 
   return (
@@ -100,7 +117,7 @@ const ExperienceForm = () => {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input placeholder="Describe your role and responsibilities" {...field} />
+                    <Textarea placeholder="Describe your role and responsibilities" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -111,12 +128,12 @@ const ExperienceForm = () => {
             <div>
               <button
                 type="submit"
-                disabled={form.formState.isSubmitting}
-                className={`w-full cursor-pointer py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  form.formState.isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                disabled={isPending}
+                className={`w-full cursor-pointer py-2 bg-black text-white px-4 font-semibold rounded-md focus:outline-none focus:ring-2 ${
+                  isPending ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
-                {form.formState.isSubmitting ? "Saving..." : "Save Experience"}
+                {isPending ? "Saving..." : "Save Experience"}
               </button>
             </div>
           </form>
