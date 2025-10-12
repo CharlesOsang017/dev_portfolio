@@ -13,3 +13,12 @@ export interface Skill{
     title: string;
     description: string;
 }
+
+export interface Experience {
+    _id: string;
+    company: string;
+    role: string;
+    startDate: Date;
+    endDate: Date;
+    description: string[];
+  }

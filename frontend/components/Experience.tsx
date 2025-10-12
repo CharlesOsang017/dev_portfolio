@@ -1,44 +1,49 @@
+import type { Experience } from "@/app/types";
 import React from "react";
 
-const Experience = () => {
-  const experiences = [
-    {
-      id: 1,
-      company: "Techcop Solutions",
-      role: "Senior Full Stack Developer",
-      startDate: new Date("2022-06-01"),
-      endDate: new Date("2023-09-01"),
-      description: [
-        "Led development of a scalable e-commerce platform using React, Node.js, and MongoDB.",
-        "Optimized application performance, reducing load times by 30%.",
-        "Mentored junior developers and conducted code reviews to ensure quality.",
-      ],
-    },
-    {
-      id: 2,
-      company: "Innovatex Labs",
-      role: "Fronted Developer",
-      startDate: new Date("2021-09-01"),
-      endDate: new Date("2022-06-01"),
-      description: [
-        "Developed responsive web interfaces using React and Tailwind CSS.",
-        "Implemented user authentication and authorization using Firebase.",
-        "Optimized application performance, reducing load times by 30%.",
-      ],
-    },
-    {
-      id: 3,
-      company: "StartUp Dynamics",
-      role: "Junior Software developer",
-      startDate: new Date("2020-09-01"),
-      endDate: new Date("2021-06-01"),
-      description: [
-        "Developed responsive web interfaces using React and Tailwind CSS.",
-        "Implemented user authentication and authorization using Firebase.",
-        "Optimized application performance, reducing load times by 30%.",
-      ],
-    },
-  ];
+interface experienceProps {
+  experiences: Experience[];
+}
+
+const Experience = ({ experiences }: experienceProps) => {
+  // const experiences = [
+  //   {
+  //     id: 1,
+  //     company: "Techcop Solutions",
+  //     role: "Senior Full Stack Developer",
+  //     startDate: new Date("2022-06-01"),
+  //     endDate: new Date("2023-09-01"),
+  //     description: [
+  //       "Led development of a scalable e-commerce platform using React, Node.js, and MongoDB.",
+  //       "Optimized application performance, reducing load times by 30%.",
+  //       "Mentored junior developers and conducted code reviews to ensure quality.",
+  //     ],
+  //   },
+  //   {
+  //     id: 2,
+  //     company: "Innovatex Labs",
+  //     role: "Fronted Developer",
+  //     startDate: new Date("2021-09-01"),
+  //     endDate: new Date("2022-06-01"),
+  //     description: [
+  //       "Developed responsive web interfaces using React and Tailwind CSS.",
+  //       "Implemented user authentication and authorization using Firebase.",
+  //       "Optimized application performance, reducing load times by 30%.",
+  //     ],
+  //   },
+  //   {
+  //     id: 3,
+  //     company: "StartUp Dynamics",
+  //     role: "Junior Software developer",
+  //     startDate: new Date("2020-09-01"),
+  //     endDate: new Date("2021-06-01"),
+  //     description: [
+  //       "Developed responsive web interfaces using React and Tailwind CSS.",
+  //       "Implemented user authentication and authorization using Firebase.",
+  //       "Optimized application performance, reducing load times by 30%.",
+  //     ],
+  //   },
+  // ];
   return (
     <>
       <style>{`
@@ -100,7 +105,7 @@ const Experience = () => {
         </div>
         <div className='max-w-6xl mx-auto px-4 sm:px-6 md:px-8 relative'>
           {experiences?.map((experience) => (
-            <div key={experience.id}>
+            <div key={experience._id}>
               <div className='timeline-line' />
               <div className='flex flex-col gap-6 m-6 sm:gap-8'>
                 <div
@@ -118,17 +123,22 @@ const Experience = () => {
                       {experience.company}
                     </p>
                     <p className='text-xs sm:text-sm text-gray-400'>
-                      {experience.startDate.toLocaleDateString()} –{" "}
-                      {experience.endDate.toLocaleDateString()}
+                      {new Date(experience.startDate).toLocaleDateString()} –{" "}
+                      {new Date(experience.endDate).toLocaleDateString()}
                     </p>
-                    {experience.description?.map((description, index) => (
-                      <ul
-                        key={index}
-                        className='mt-2 text-sm sm:text-base text-gray-200 list-disc list-inside'
-                      >
-                        <li>{description}</li>
-                      </ul>
-                    ))}
+                    <p className='mt-2 text-sm sm:text-base text-gray-200'>
+                      {typeof experience.description === "string" ? (
+                        <ul className='list-disc list-inside'>
+                          <li>{experience.description}</li>
+                        </ul>
+                      ) : (
+                        experience.description?.map((desc, index) => (
+                          <ul key={index} className='list-disc list-inside'>
+                            <li>{desc}</li>
+                          </ul>
+                        ))
+                      )}
+                    </p>
                   </div>
                 </div>
               </div>

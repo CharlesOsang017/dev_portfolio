@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/fetch-utils";
 import { Skill } from "@/app/types";
 import useGetSkills from "@/app/hooks/use-skills";
+import useGetExperiences from "@/app/hooks/use-experiences";
 
 const Hero = () => {
   // Refs for each section
@@ -73,6 +74,7 @@ const Hero = () => {
 
   // Fetch data using useQuery
  const {skills, isLoadingSkills} = useGetSkills();
+  const {experiences, isLoadingExperiences} = useGetExperiences()
 
  console.log("skills from Hero", skills);
 
@@ -210,7 +212,7 @@ const Hero = () => {
         initial='hidden'
         animate={experienceInView ? "visible" : "hidden"}
       >
-        <Experience />
+        <Experience  experiences={experiences}/>
       </motion.div>
       <motion.div
         ref={projectsRef}

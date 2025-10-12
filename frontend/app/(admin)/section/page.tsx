@@ -20,6 +20,7 @@ import { api } from "@/lib/fetch-utils";
 import { toast } from "sonner";
 import Loader from "@/components/loader/Loader";
 import useGetSkills from "@/app/hooks/use-skills";
+import useGetExperiences from "@/app/hooks/use-experiences";
 
 // Utility function to convert File to base64
 const fileToBase64 = (file: File): Promise<string> => {
@@ -47,7 +48,7 @@ interface Project {
   image?: string;
 }
 
-interface Experience {
+export interface Experience {
   _id: string;
   company: string;
   role: string;
@@ -102,13 +103,10 @@ const {skills,  isLoadingSkills} = useGetSkills();
     },
   });
 
-  const { data: experiences, isLoading: isLoadingExperiences } = useQuery<Experience[]>({
-    queryKey: ["experience"],
-    queryFn: async () => {
-      const response = await api.get("/experience");
-      return response.data as Experience[];
-    },
-  });
+
+  const {experiences, isLoadingExperiences} = useGetExperiences()
+
+
 
   const { data: aboutInfo, isLoading: isLoadingAbout } = useQuery<About>({
     queryKey: ["aboutInfo"],
