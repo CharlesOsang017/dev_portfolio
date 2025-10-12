@@ -120,7 +120,7 @@ const Admin = () => {
   });
 
   const { data: aboutInfo, isLoading: isLoadingAbout } = useQuery<About>({
-    queryKey: ["about"],
+    queryKey: ["aboutInfo"],
     queryFn: async () => {
       const response = await api.get("/about");
       return response.data as About;
