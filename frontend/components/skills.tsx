@@ -1,43 +1,49 @@
-const Skills = () => {
-  const skills = [
-    {
-      id: 1,
-      title: "CSS",
-      description: "User Interface",
-      logo: "/images/css3.svg",
-    },
-    {
-      id: 2,
-      title: "Expressjs",
-      description: "Node Framework",
-      logo: "/images/expressjs.svg",
-    },
-    {
-      id: 3,
-      title: "Javascript",
-      description: "Interaction",
-      logo: "/images/javascript.svg",
-    },
-    {
-      id: 4,
-      title: "Mongo DB",
-      description: "Database",
-      logo: "/images/mongodb.svg",
-    },
-    {
-      id: 5,
-      title: "Nodejs",
-      description: "Backend",
-      logo: "/images/nodejs.svg",
-    },
-    {
-      id: 6,
-      title: "Figma",
-      description: "Design",
-      logo: "/images/figma.svg",
-    },
-  ];
+import { Skill } from "@/app/types";
 
+interface skillProps{
+  skills: Skill[]
+}
+
+const Skills = ({skills}: skillProps) => {
+  // const skills = [
+  //   {
+  //     id: 1,
+  //     title: "CSS",
+  //     description: "User Interface",
+  //     logo: "/images/css3.svg",
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Expressjs",
+  //     description: "Node Framework",
+  //     logo: "/images/expressjs.svg",
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Javascript",
+  //     description: "Interaction",
+  //     logo: "/images/javascript.svg",
+  //   },
+  //   {
+  //     id: 4,
+  //     title: "Mongo DB",
+  //     description: "Database",
+  //     logo: "/images/mongodb.svg",
+  //   },
+  //   {
+  //     id: 5,
+  //     title: "Nodejs",
+  //     description: "Backend",
+  //     logo: "/images/nodejs.svg",
+  //   },
+  //   {
+  //     id: 6,
+  //     title: "Figma",
+  //     description: "Design",
+  //     logo: "/images/figma.svg",
+  //   },
+  // ];
+   console.log("skills", skills);
   return (
     <>
       <style>{`
@@ -75,9 +81,9 @@ const Skills = () => {
           </p>
         </div>
         <div className='max-w-6xl mx-auto px-4 sm:px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6'>
-          {skills.map((skill, index) => (
+          {skills?.map((skill, index) => (
             <div
-              key={skill.id}
+              key={skill._id}
               className='flex gap-4 border border-slate-600 rounded-2xl p-4 hover:bg-transparent bg-gray-800 hover-scale animate-slide-up'
               style={{ animationDelay: `${index * 0.1}s` }}
             >

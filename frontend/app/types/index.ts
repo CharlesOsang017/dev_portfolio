@@ -7,3 +7,9 @@ export interface User {
     updatedAt: string,
     __v: number,
 }
+export interface Skill{
+    _id: string;
+    logo: string;
+    title: string;
+    description: string;
+}

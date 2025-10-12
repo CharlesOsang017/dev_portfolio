@@ -18,6 +18,8 @@ import { MoreHorizontal, X } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/fetch-utils";
 import { toast } from "sonner";
+import Loader from "@/components/loader/Loader";
+import useGetSkills from "@/app/hooks/use-skills";
 
 // Utility function to convert File to base64
 const fileToBase64 = (file: File): Promise<string> => {
@@ -77,14 +79,7 @@ type ModalType = "update" | "delete" | "view" | null;
 type SectionType = "skill" | "project" | "experience" | "aboutInfo" | null;
 
 // Loader Component
-const Loader = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
-    <div className="flex flex-col items-center">
-      <div className="w-12 h-12 border-4 border-t-indigo-600 border-gray-200 rounded-full animate-spin"></div>
-      <p className="mt-4 text-lg font-semibold text-gray-700">Loading...</p>
-    </div>
-  </div>
-);
+
 
 const Admin = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -95,13 +90,9 @@ const Admin = () => {
   const queryClient = useQueryClient();
 
   // Fetch data using useQuery
-  const { data: skills, isLoading: isLoadingSkills } = useQuery<Skill[]>({
-    queryKey: ["skill"],
-    queryFn: async () => {
-      const response = await api.get("/skill");
-      return response.data as Skill[];
-    },
-  });
+const {skills,  isLoadingSkills} = useGetSkills();
+
+  console.log("skills from useQuery", skills);
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
     queryKey: ["project"],

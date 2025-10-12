@@ -12,6 +12,10 @@ import Footer from "./Footer";
 import heroImage from "../public/images/hero-banner.png";
 import workImage from "../public/images/avatar-1.jpg";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/fetch-utils";
+import { Skill } from "@/app/types";
+import useGetSkills from "@/app/hooks/use-skills";
 
 const Hero = () => {
   // Refs for each section
@@ -66,6 +70,14 @@ const Hero = () => {
     margin: "-100px",
   });
   const contactInView = useInView(contactRef, { once: true, margin: "-100px" });
+
+  // Fetch data using useQuery
+ const {skills, isLoadingSkills} = useGetSkills();
+
+ console.log("skills from Hero", skills);
+
+
+  
 
   const heroInfo = {
     heroImage: heroImage,
@@ -189,7 +201,7 @@ const Hero = () => {
         initial='hidden'
         animate={skillsInView ? "visible" : "hidden"}
       >
-        <Skills />
+        <Skills  skills={skills}/>
       </motion.div>
       <motion.div
         ref={experienceRef}
