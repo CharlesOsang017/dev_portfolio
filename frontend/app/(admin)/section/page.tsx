@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import Loader from "@/components/loader/Loader";
 import useGetSkills from "@/app/hooks/use-skills";
 import useGetExperiences from "@/app/hooks/use-experiences";
+import useGetProjects from "@/app/hooks/use-projects";
 
 // Utility function to convert File to base64
 const fileToBase64 = (file: File): Promise<string> => {
@@ -93,15 +94,9 @@ const Admin = () => {
   // Fetch data using useQuery
 const {skills,  isLoadingSkills} = useGetSkills();
 
-  console.log("skills from useQuery", skills);
+  const {projects, isLoadingProjects} = useGetProjects()
 
-  const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
-    queryKey: ["project"],
-    queryFn: async () => {
-      const response = await api.get("/project");
-      return response.data as Project[];
-    },
-  });
+
 
 
   const {experiences, isLoadingExperiences} = useGetExperiences()

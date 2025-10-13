@@ -1,22 +1,21 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
 
-export const queryClient = new QueryClient();
-import { Toaster } from "sonner";
-// import { AuthProvider } from "./auth.context";
+export function ReactQueryProvider({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        // Prevent refetching on client hydration
+        refetchOnWindowFocus: false,
+        staleTime: Infinity, // Adjust as needed
+      },
+    },
+  }));
 
-
-export function ReactQueryProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
   return (
     <QueryClientProvider client={queryClient}>
-      {/* <AuthProvider> */}
-        {children}
-        <Toaster position='bottom-right' richColors />
-      {/* </AuthProvider> */}
+      {children}
     </QueryClientProvider>
   );
 }

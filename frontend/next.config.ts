@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: [], // Not needed for local images
+    domains: ['res.cloudinary.com'], // Add the hostname here
   },
 };
 

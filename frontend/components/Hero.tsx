@@ -17,6 +17,7 @@ import { api } from "@/lib/fetch-utils";
 import { Skill } from "@/app/types";
 import useGetSkills from "@/app/hooks/use-skills";
 import useGetExperiences from "@/app/hooks/use-experiences";
+import useGetProjects from "@/app/hooks/use-projects";
 
 const Hero = () => {
   // Refs for each section
@@ -75,12 +76,12 @@ const Hero = () => {
   // Fetch data using useQuery
  const {skills, isLoadingSkills} = useGetSkills();
   const {experiences, isLoadingExperiences} = useGetExperiences()
+  const { projects, isLoadingProjects } = useGetProjects();
 
- console.log("skills from Hero", skills);
+//  console.log("skills from Hero", skills);
 
 
   
-
   const heroInfo = {
     heroImage: heroImage,
     workImage: workImage,
@@ -221,7 +222,7 @@ const Hero = () => {
         initial='hidden'
         animate={projectsInView ? "visible" : "hidden"}
       >
-        <Projects />
+        <Projects projects={projects}/>
       </motion.div>
       <motion.div
         ref={contactRef}

@@ -22,3 +22,11 @@ export interface Experience {
     endDate: Date;
     description: string[];
   }
+
+  export interface Project {
+    _id: string;
+    title: string;
+    technologies: string[];
+    link?: string;
+    image?: string;
+  }

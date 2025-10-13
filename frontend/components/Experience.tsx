@@ -126,7 +126,7 @@ const Experience = ({ experiences }: experienceProps) => {
                       {new Date(experience.startDate).toLocaleDateString()} –{" "}
                       {new Date(experience.endDate).toLocaleDateString()}
                     </p>
-                    <p className='mt-2 text-sm sm:text-base text-gray-200'>
+                    <div className='mt-2 text-sm sm:text-base text-gray-200'>
                       {typeof experience.description === "string" ? (
                         <ul className='list-disc list-inside'>
                           <li>{experience.description}</li>
@@ -138,7 +138,7 @@ const Experience = ({ experiences }: experienceProps) => {
                           </ul>
                         ))
                       )}
-                    </p>
+                    </div>
                   </div>
                 </div>
               </div>
