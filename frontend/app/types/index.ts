@@ -30,3 +30,14 @@ export interface Experience {
     link?: string;
     image?: string;
   }
+
+  export interface About {
+    _id: string;
+    heroImage?: string;
+    workImage?: string;
+    heroTitle: string;
+    heroDescription: string;
+    aboutDescription: string;
+    projectsCompleted: number;
+    yearsOfExperience: number;
+  }

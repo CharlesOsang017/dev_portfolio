@@ -22,6 +22,7 @@ import Loader from "@/components/loader/Loader";
 import useGetSkills from "@/app/hooks/use-skills";
 import useGetExperiences from "@/app/hooks/use-experiences";
 import useGetProjects from "@/app/hooks/use-projects";
+import useGetAbout from "@/app/hooks/use-about";
 
 // Utility function to convert File to base64
 const fileToBase64 = (file: File): Promise<string> => {
@@ -92,24 +93,14 @@ const Admin = () => {
   const queryClient = useQueryClient();
 
   // Fetch data using useQuery
-const {skills,  isLoadingSkills} = useGetSkills();
-
+  const {skills,  isLoadingSkills} = useGetSkills();
   const {projects, isLoadingProjects} = useGetProjects()
-
-
-
-
   const {experiences, isLoadingExperiences} = useGetExperiences()
+  const {aboutInfo, isLoadingAbout} = useGetAbout()
 
 
 
-  const { data: aboutInfo, isLoading: isLoadingAbout } = useQuery<About>({
-    queryKey: ["aboutInfo"],
-    queryFn: async () => {
-      const response = await api.get("/about");
-      return response.data as About;
-    },
-  });
+
 
   // Check if any query is loading
   const isLoading = isLoadingSkills || isLoadingProjects || isLoadingExperiences || isLoadingAbout;

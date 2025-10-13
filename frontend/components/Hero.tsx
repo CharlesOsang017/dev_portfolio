@@ -18,6 +18,7 @@ import { Skill } from "@/app/types";
 import useGetSkills from "@/app/hooks/use-skills";
 import useGetExperiences from "@/app/hooks/use-experiences";
 import useGetProjects from "@/app/hooks/use-projects";
+import useGetAbout from "@/app/hooks/use-about";
 
 const Hero = () => {
   // Refs for each section
@@ -77,22 +78,23 @@ const Hero = () => {
  const {skills, isLoadingSkills} = useGetSkills();
   const {experiences, isLoadingExperiences} = useGetExperiences()
   const { projects, isLoadingProjects } = useGetProjects();
+  const { aboutInfo, isLoadingAbout } = useGetAbout();
 
 //  console.log("skills from Hero", skills);
 
 
   
-  const heroInfo = {
-    heroImage: heroImage,
-    workImage: workImage,
-    heroTitle: "Crafting Scalable websites for the future",
-    heroDescription:
-      "I build high-performance, user-focused web experiences that drive impact and growth.",
-    aboutDescription:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum.",
-    projectsCompleted: 10,
-    yearsOfExperience: 2,
-  };
+  // const heroInfo = {
+  //   heroImage: heroImage,
+  //   workImage: workImage,
+  //   heroTitle: "Crafting Scalable websites for the future",
+  //   heroDescription:
+  //     "I build high-performance, user-focused web experiences that drive impact and growth.",
+  //   aboutDescription:
+  //     "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum.",
+  //   projectsCompleted: 10,
+  //   yearsOfExperience: 2,
+  // };
 
   return (
     <div>
@@ -116,8 +118,8 @@ const Hero = () => {
             <Image
               height={60}
               width={60}
-              src={heroInfo?.workImage}
-              alt={heroInfo?.heroTitle}
+              src={aboutInfo?.workImage}
+              alt={aboutInfo?.heroTitle}
               className='rounded-full border-2 border-indigo-400 shadow-lg'
             />
             <Wifi size={32} className='text-green-400 animate-pulse' />
@@ -131,7 +133,7 @@ const Hero = () => {
             className='text-lg md:text-5xl lg:text-3xl font-bold tracking-tight leading-tight'
             variants={childVariants}
           >
-            {heroInfo?.heroTitle}
+            {aboutInfo?.heroTitle}
           </motion.h1>
 
           {/* Subtext */}
@@ -139,7 +141,7 @@ const Hero = () => {
             className='text-gray-300 text-base md:text-lg max-w-md'
             variants={childVariants}
           >
-            {heroInfo?.heroDescription}
+            {aboutInfo?.heroDescription}
           </motion.p>
 
           {/* Buttons */}
@@ -174,7 +176,7 @@ const Hero = () => {
           <Image
             width={400}
             height={400}
-            src={heroInfo.heroImage}
+            src={aboutInfo?.heroImage}
             alt='Illustration of a modern web development workflow'
             className='rounded-lg shadow-2xl bg-gradient-to-b from-gray-900 to-cyan-700 transform hover:scale-105 transition-transform duration-500'
           />
@@ -195,7 +197,7 @@ const Hero = () => {
         initial='hidden'
         animate={heroInfoInView ? "visible" : "hidden"}
       >
-        <HeroInfo heroInfo={heroInfo} />
+        <HeroInfo aboutInfo={aboutInfo} />
       </motion.div>
       <motion.div
         ref={skillsRef}
