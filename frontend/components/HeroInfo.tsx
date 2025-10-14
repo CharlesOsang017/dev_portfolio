@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 interface AboutInfo {
-  heroDescription?: string;
+  aboutDescription?: string;
   projectsCompleted?: number;
   yearsOfExperience?: number;
 }
@@ -49,7 +49,7 @@ const HeroInfo = ({ aboutInfo }: { aboutInfo: AboutInfo }) => {
       <div className="sm:px-6 md:px-20 px-20 md:mb-30 md:max-w-[69rem] bg-gradient-to-br from-zinc-800 to-gray-900 py-2 md:py-6 rounded-2xl animate-slide-up">
         <div className="max-w-3xl">
           <p className="text-sm sm:text-base md:text-lg text-gray-200">
-            {aboutInfo?.heroDescription || "Welcome! I'm a professional software developer."}
+            {aboutInfo?.aboutDescription || "Welcome! I'm a professional software developer."}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row md:justify-between items-center py-4 gap-6 sm:gap-4">
