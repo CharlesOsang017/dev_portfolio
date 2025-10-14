@@ -122,10 +122,10 @@ const Hero = () => {
             className="text-gray-300 text-base md:text-lg max-w-md"
             variants={childVariants}
           >
-            {isLoadingAbout
+            {/* {isLoadingAbout
               ? "Loading description..."
               : aboutInfo?.heroDescription ||
-                "I build high-performance, user-focused web experiences."}
+                "I build high-performance, user-focused web experiences."} */}
           </motion.p>
 
           {/* Buttons */}
