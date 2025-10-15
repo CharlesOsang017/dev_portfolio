@@ -90,7 +90,12 @@ const ProjectForm = () => {
   };
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: {title: string; technologies: string[]; link?: string; image?: string;}) => {
+    mutationFn: async (data: {
+      title: string;
+      technologies: string[];
+      link?: string;
+      image?: string;
+    }) => {
       return api.post("/project", data);
     },
     onSuccess: () => {
@@ -100,7 +105,7 @@ const ProjectForm = () => {
     },
     onError: (error: any) => {
       const errorMessage =
-      error?.response?.data?.message || "Something went wrong";
+        error?.response?.data?.message || "Something went wrong";
       toast.error(errorMessage);
     },
   });
@@ -135,21 +140,21 @@ const ProjectForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-4">
-      <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Add Project</h2>
+    <div className='min-h-screen bg-gray-100 py-10 px-4'>
+      <div className='max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg'>
+        <h2 className='text-2xl font-bold mb-6 text-center'>Add Project</h2>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
             {/* Title */}
             <FormField
               control={form.control}
-              name="title"
+              name='title'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Project Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter project title" {...field} />
+                    <Input placeholder='Enter project title' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -159,13 +164,13 @@ const ProjectForm = () => {
             {/* Technologies */}
             <FormField
               control={form.control}
-              name="technologies"
+              name='technologies'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Technologies (comma-separated)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., React, Node.js, MongoDB"
+                      placeholder='e.g., React, Node.js, MongoDB'
                       {...field}
                     />
                   </FormControl>
@@ -177,14 +182,14 @@ const ProjectForm = () => {
             {/* Link */}
             <FormField
               control={form.control}
-              name="link"
+              name='link'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Project Link (Optional)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="https://example.com"
-                      type="url"
+                      placeholder='https://example.com'
+                      type='url'
                       {...field}
                     />
                   </FormControl>
@@ -196,14 +201,14 @@ const ProjectForm = () => {
             {/* Image */}
             <FormField
               control={form.control}
-              name="image"
+              name='image'
               render={({ field: { onChange, value, ...field } }) => (
                 <FormItem>
                   <FormLabel>Project Image (Optional)</FormLabel>
                   <FormControl>
                     <Input
-                      type="file"
-                      accept="image/jpeg,image/png,image/gif"
+                      type='file'
+                      accept='image/jpeg,image/png,image/gif'
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         onChange(file); // Pass the File object to React Hook Form
@@ -213,15 +218,15 @@ const ProjectForm = () => {
                     />
                   </FormControl>
                   {imagePreview && (
-                    <div className="relative">
+                    <div className='relative'>
                       <X
-                        className="absolute top-2 right-2 cursor-pointer"
+                        className='absolute top-2 right-2 cursor-pointer'
                         onClick={handleClearImage}
                       />
                       <img
                         src={imagePreview}
-                        alt="Project Preview"
-                        className="mt-2 w-full h-40 object-cover rounded-md"
+                        alt='Project Preview'
+                        className='mt-2 w-full h-40 object-cover rounded-md'
                       />
                     </div>
                   )}
@@ -232,7 +237,7 @@ const ProjectForm = () => {
 
             {/* Submit Button */}
             <Button
-              type="submit"
+              type='submit'
               disabled={isPending}
               className={`w-full ${
                 isPending ? "opacity-50 cursor-not-allowed" : ""

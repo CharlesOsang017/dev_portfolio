@@ -18,7 +18,7 @@ const experienceSchema = new mongoose.Schema({
         required: true
     },
     description: {
-        type: String,
+        type: [String],
         required: true
     }
 }, {timestamps: true})

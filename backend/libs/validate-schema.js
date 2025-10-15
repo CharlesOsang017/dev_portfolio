@@ -40,8 +40,13 @@ export const experienceSchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
   description: z
-    .string()
-    .min(3, { message: "Name must be at least 3 characters long" }),
+    .array(
+      z.string().min(3, {
+        message: "Each technology must be at least 3 characters long",
+      })
+    )
+    .min(1, { message: "At least one technology is required" }) // Ensure array isn't empty
+    .nonempty({ message: "Technologies array cannot be empty" }),
 });
 
 export const projectSchema = z.object({
@@ -50,11 +55,9 @@ export const projectSchema = z.object({
     .min(3, { message: "Name must be at least 3 characters long" }),
   technologies: z
     .array(
-      z
-        .string()
-        .min(3, {
-          message: "Each technology must be at least 3 characters long",
-        })
+      z.string().min(3, {
+        message: "Each technology must be at least 3 characters long",
+      })
     )
     .min(1, { message: "At least one technology is required" }) // Ensure array isn't empty
     .nonempty({ message: "Technologies array cannot be empty" }), // Alternative to min(1)
@@ -72,16 +75,12 @@ export const aboutSchema = z.object({
   aboutDescription: z
     .string()
     .min(3, { message: "Name must be at least 3 characters long" }),
-  projectsCompleted: z
-    .number()
-    .min(1, {
-      message: "projects completed must be at least 1 characters long",
-    }),
-  yearsOfExperience: z
-    .number()
-    .min(1, {
-      message: "years of experience must be at least 1 characters long",
-    }),
+  projectsCompleted: z.number().min(1, {
+    message: "projects completed must be at least 1 characters long",
+  }),
+  yearsOfExperience: z.number().min(1, {
+    message: "years of experience must be at least 1 characters long",
+  }),
   heroImage: z.string(),
   workImage: z.string(),
 });

@@ -2,7 +2,14 @@
 import { useForm } from "react-hook-form";
 import { experienceSchema } from "@/lib/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,44 +27,78 @@ const ExperienceForm = () => {
       role: "",
       startDate: "",
       endDate: "",
-      description: "",
+      description: [],
     },
   });
 
-  const {mutate, isPending} = useMutation({
-    mutationFn: async(data: ExperienceData) =>{
-      return api.post("/experience", data)
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (data: {
+      company: string;
+      role: string;
+      startDate: string;
+      endDate: string;
+      description: string[];
+    }) => {
+      return api.post("/experience", data);
     },
-    onSuccess: ()=>{
-      toast.success("Experience Created Successfully!")
-      form.reset()
+    onSuccess: () => {
+      toast.success("Experience Created Successfully!");
+      form.reset();
     },
-    onError: (error: any)=>{
-      const errorMessage = error?.response?.data?.message || "Something went wrong";
-      toast.error(errorMessage)
-    }
-  })
+    onError: (error: any) => {
+      const errorMessage =
+        error?.response?.data?.message || "Something went wrong";
+      toast.error(errorMessage);
+    },
+  });
 
-  const onSubmit = (data: ExperienceData) => {
-    mutate(data)
+  const onSubmit = (data: {
+    company: string;
+    role: string;
+    startDate: string;
+    endDate: string;
+    description: string[];
+  }) => {
+    try {
+      let submissionData: {
+        company: string;
+        role: string;
+        startDate: string;
+        endDate: string;
+        description: string[];
+      } = {
+        company: data.company,
+        role: data.role,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        description: data.description
+          .split(",")
+          .map((desc) => desc.trim())
+          .filter((desc) => desc),
+      };
+
+      mutate(submissionData);
+    } catch (error) {
+      console.error("Error processing form submission:", error);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-4">
-      <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Add Experience</h2>
+    <div className='min-h-screen bg-gray-100 py-10 px-4'>
+      <div className='max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg'>
+        <h2 className='text-2xl font-bold mb-6 text-center'>Add Experience</h2>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
             {/* Company */}
             <FormField
               control={form.control}
-              name="company"
+              name='company'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Company</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter company name" {...field} />
+                    <Input placeholder='Enter company name' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -67,12 +108,12 @@ const ExperienceForm = () => {
             {/* Role */}
             <FormField
               control={form.control}
-              name="role"
+              name='role'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Role</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter job role" {...field} />
+                    <Input placeholder='Enter job role' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -82,12 +123,12 @@ const ExperienceForm = () => {
             {/* Start Date */}
             <FormField
               control={form.control}
-              name="startDate"
+              name='startDate'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Start Date</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input type='date' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -97,12 +138,12 @@ const ExperienceForm = () => {
             {/* End Date */}
             <FormField
               control={form.control}
-              name="endDate"
+              name='endDate'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>End Date</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input type='date' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,12 +153,15 @@ const ExperienceForm = () => {
             {/* Description */}
             <FormField
               control={form.control}
-              name="description"
+              name='description'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Describe your role and responsibilities" {...field} />
+                    <Textarea
+                      placeholder='Describe your role and responsibilities'
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -127,7 +171,7 @@ const ExperienceForm = () => {
             {/* Submit Button */}
             <div>
               <button
-                type="submit"
+                type='submit'
                 disabled={isPending}
                 className={`w-full cursor-pointer py-2 bg-black text-white px-4 font-semibold rounded-md focus:outline-none focus:ring-2 ${
                   isPending ? "opacity-50 cursor-not-allowed" : ""
