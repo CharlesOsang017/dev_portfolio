@@ -14,12 +14,20 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// export const metadata: Metadata = {
+//   title: "Charles Osango | Portfolio",
+//   description: "Explore the modern portfolio",
+//   icons: {
+//     icon: "/favicon.svg",
+//   },
+// };
+
 export const metadata: Metadata = {
-  title: "Charles Osango | Portfolio",
-  description: "Explore the modern portfolio",
-  icons: {
-    icon: "/favicon.svg",
+  title: {
+    template: "%s | Charles Osango", // %s will be replaced by page-specific titles
+    default: "Charles Osango | Portfolio", // Fallback title
   },
+  description: "Explore the modern portfolio",
 };
 
 export default function RootLayout({

@@ -1,5 +1,5 @@
 "use client";
-import { useForm } from "react-hook-form";
+import { Control, useForm } from "react-hook-form";
 import { experienceSchema } from "@/lib/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -27,7 +27,7 @@ const ExperienceForm = () => {
       role: "",
       startDate: "",
       endDate: "",
-      description: [],
+      description: "",
     },
   });
 
@@ -57,7 +57,7 @@ const ExperienceForm = () => {
     role: string;
     startDate: string;
     endDate: string;
-    description: string[];
+    description: string;
   }) => {
     try {
       let submissionData: {
@@ -71,10 +71,9 @@ const ExperienceForm = () => {
         role: data.role,
         startDate: data.startDate,
         endDate: data.endDate,
-        description: data.description
-          .split(",")
-          .map((desc) => desc.trim())
-          .filter((desc) => desc),
+        description: data.description.split(",")
+          .map((desc: any) => desc.trim())
+          .filter((desc: any) => desc),
       };
 
       mutate(submissionData);
@@ -89,10 +88,10 @@ const ExperienceForm = () => {
         <h2 className='text-2xl font-bold mb-6 text-center'>Add Experience</h2>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+          <form onSubmit={form.handleSubmit(onSubmit as any)} className='space-y-6'>
             {/* Company */}
             <FormField
-              control={form.control}
+              control={form.control as unknown as Control<ExperienceData>}
               name='company'
               render={({ field }) => (
                 <FormItem>
@@ -107,7 +106,7 @@ const ExperienceForm = () => {
 
             {/* Role */}
             <FormField
-              control={form.control}
+              control={form.control as unknown as Control<ExperienceData>}
               name='role'
               render={({ field }) => (
                 <FormItem>
@@ -122,7 +121,7 @@ const ExperienceForm = () => {
 
             {/* Start Date */}
             <FormField
-              control={form.control}
+              control={form.control as unknown as Control<ExperienceData>}
               name='startDate'
               render={({ field }) => (
                 <FormItem>
@@ -137,7 +136,7 @@ const ExperienceForm = () => {
 
             {/* End Date */}
             <FormField
-              control={form.control}
+              control={form.control as unknown as Control<ExperienceData>}
               name='endDate'
               render={({ field }) => (
                 <FormItem>
@@ -152,7 +151,7 @@ const ExperienceForm = () => {
 
             {/* Description */}
             <FormField
-              control={form.control}
+              control={form.control as unknown as Control<ExperienceData>}
               name='description'
               render={({ field }) => (
                 <FormItem>
