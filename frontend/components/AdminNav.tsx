@@ -34,7 +34,9 @@ const AdminNav = () => {
       {/* Desktop Sidebar */}
       <div className="hidden md:flex fixed inset-y-0 left-0 bg-gray-900 text-white w-48 flex-col z-50">
         <div className="p-4 border-b border-gray-700">
-          <h2 className="text-2xl font-bold">Menu</h2>
+          <Link href={"/section"}>
+          <h2 className="text-2xl font-bold">Admin</h2>
+          </Link>
         </div>
         <nav className="flex-1 p-4 flex flex-col">
           <ul className="space-y-2">

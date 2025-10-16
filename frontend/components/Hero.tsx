@@ -16,10 +16,6 @@ import useGetSkills from "@/app/hooks/use-skills";
 import useGetExperiences from "@/app/hooks/use-experiences";
 import useGetProjects from "@/app/hooks/use-projects";
 import useGetAbout from "@/app/hooks/use-about";
-// import { useGetSkills } from "@/app/hooks/use-skills";
-// import { useGetExperiences } from "@/app/hooks/use-experiences";
-// import { useGetProjects } from "@/app/hooks/use-projects";
-// import { useGetAbout } from "@/app/hooks/use-about";
 
 const Hero = () => {
   // Refs for each section
