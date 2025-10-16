@@ -4,10 +4,8 @@ import { Button } from "./ui/button";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import HeroInfo from "./HeroInfo";
-import Skills from "./skills";
 import Experience from "./Experience";
 import Projects from "./Projects";
-import ContactPage from "./contact";
 import Footer from "./Footer";
 import heroImage from "../public/images/hero-banner.png";
 import workImage from "../public/images/avatar-1.jpg";
@@ -16,6 +14,9 @@ import useGetSkills from "@/app/hooks/use-skills";
 import useGetExperiences from "@/app/hooks/use-experiences";
 import useGetProjects from "@/app/hooks/use-projects";
 import useGetAbout from "@/app/hooks/use-about";
+import Skills from "./skills";
+import ContactPage from "./contact";
+import { About, Skill, Experience as ExperienceType, Project } from "@/app/types";
 
 const Hero = () => {
   // Refs for each section
@@ -34,7 +35,7 @@ const Hero = () => {
       y: 0,
       transition: {
         duration: 0.8,
-        ease: "easeOut",
+        ease: "easeOut" as const, // Fix type mismatch
         staggerChildren: 0.2,
       },
     },
@@ -51,7 +52,10 @@ const Hero = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.8, ease: "easeOut" },
+      transition: {
+        duration: 0.8,
+        ease: "easeOut" as const, // Fix type mismatch
+      },
     },
   };
 
@@ -118,10 +122,10 @@ const Hero = () => {
             className="text-gray-300 text-base md:text-lg max-w-md"
             variants={childVariants}
           >
-            {/* {isLoadingAbout
+            {isLoadingAbout
               ? "Loading description..."
               : aboutInfo?.heroDescription ||
-                "I build high-performance, user-focused web experiences."} */}
+                "I build high-performance, user-focused web experiences."}
           </motion.p>
 
           {/* Buttons */}
@@ -182,17 +186,17 @@ const Hero = () => {
         initial="hidden"
         animate={heroInfoInView ? "visible" : "hidden"}
       >
-        <HeroInfo aboutInfo={aboutInfo} />
+        <HeroInfo aboutInfo={aboutInfo as About} />
       </motion.div>
-      <motion.div
-        ref={skillsRef}
-        id="skills"
-        variants={sectionVariants}
-        initial="hidden"
-        animate={skillsInView ? "visible" : "hidden"}
-      >
-        <Skills skills={skills} />
-      </motion.div>
+        <motion.div
+          ref={skillsRef}
+          id="skills"
+          variants={sectionVariants}
+          initial="hidden"
+          animate={skillsInView ? "visible" : "hidden"}
+        >
+          <Skills skills={skills as Skill[]} />
+        </motion.div>
       <motion.div
         ref={experienceRef}
         id="experience"
@@ -200,7 +204,7 @@ const Hero = () => {
         initial="hidden"
         animate={experienceInView ? "visible" : "hidden"}
       >
-        <Experience experiences={experiences} />
+        <Experience experiences={experiences as Experience[]} />
       </motion.div>
       <motion.div
         ref={projectsRef}
@@ -209,7 +213,7 @@ const Hero = () => {
         initial="hidden"
         animate={projectsInView ? "visible" : "hidden"}
       >
-        <Projects projects={projects} />
+        <Projects projects={projects as Project[]} />
       </motion.div>
       <motion.div
         ref={contactRef}
