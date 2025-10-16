@@ -11,11 +11,10 @@ import project6 from "../public/images/project-6.jpg";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Project } from "@/app/types";
 
-
 interface projectProps {
-  projects: Project[]
+  projects: Project[];
 }
-const Projects = ({projects}: projectProps) => {
+const Projects = ({ projects }: projectProps) => {
   // const projects = [
   //   {
   //     id: 1,
@@ -70,7 +69,7 @@ const Projects = ({projects}: projectProps) => {
       transition: {
         delay: i * 0.2,
         duration: 0.5,
-        ease: "easeOut",
+        ease: "easeOut" as const,
       },
     }),
   };
@@ -96,20 +95,22 @@ const Projects = ({projects}: projectProps) => {
             custom={index}
           >
             {/* Image Section */}
-            <div className='relative w-full h-48'>
-              <Image
-                src={project.image}
-                alt={project.title}
-                fill
-                className='object-cover'
-                sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
-              />
-              <motion.div
-                className='absolute inset-0 bg-opacity-0 hover:bg-opacity-20'
-                whileHover={{ bgOpacity: 0.2 }}
-                transition={{ duration: 0.3 }}
-              />
-            </div>
+            {project.image && (
+              <div className='relative w-full h-48'>
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  className='object-cover'
+                  sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+                />
+                <motion.div
+                  className='absolute inset-0 bg-opacity-0 hover:bg-opacity-20'
+                  whileHover={{ opacity: 0.2 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+            )}
             {/* Content Section */}
             <div className='p-6 flex flex-col flex-grow'>
               <div className='flex items-center justify-between mb-2'>

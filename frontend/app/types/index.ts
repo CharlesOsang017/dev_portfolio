@@ -1,3 +1,5 @@
+import { StaticImport } from "next/dist/shared/lib/get-img-props";
+
 export interface User {
     _id: string,
     email: string,
@@ -28,7 +30,7 @@ export interface Experience {
     title: string;
     technologies: string[];
     link?: string;
-    image?: string;
+    image?: StaticImport;
   }
 
   export interface About {
