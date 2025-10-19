@@ -30,7 +30,7 @@ export interface Experience {
     title: string;
     technologies: string[];
     link?: string;
-    image?: StaticImport;
+    image?: string | null;
   }
 
   export interface About {

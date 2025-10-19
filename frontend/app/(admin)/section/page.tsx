@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, X } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/fetch-utils";
 import { toast } from "sonner";
 import Loader from "@/components/loader/Loader";
@@ -23,6 +23,7 @@ import useGetSkills from "@/app/hooks/use-skills";
 import useGetExperiences from "@/app/hooks/use-experiences";
 import useGetProjects from "@/app/hooks/use-projects";
 import useGetAbout from "@/app/hooks/use-about";
+import { About, Experience, Project, Skill } from "@/app/types";
 
 // Utility function to convert File to base64
 const fileToBase64 = (file: File): Promise<string> => {
@@ -34,42 +35,6 @@ const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
-// Define TypeScript interfaces for data structures
-interface Skill {
-  _id: string;
-  title: string;
-  description: string;
-  logo?: string;
-}
-
-interface Project {
-  _id: string;
-  title: string;
-  technologies: string[] | string; // Allow string for form input
-  link?: string;
-  image?: string;
-}
-
-export interface Experience {
-  _id: string;
-  company: string;
-  role: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-}
-
-interface About {
-  _id: string;
-  heroImage?: string;
-  workImage?: string;
-  heroTitle: string;
-  heroDescription: string;
-  aboutDescription: string;
-  projectsCompleted: number;
-  yearsOfExperience: number;
-}
-
 // Discriminated union for editData
 type EditData =
   | { section: "skill"; data: Skill }
@@ -79,31 +44,33 @@ type EditData =
   | { section: null; data: null };
 
 type ModalType = "update" | "delete" | "view" | null;
-type SectionType = "skill" | "project" | "experience" | "aboutInfo" | null;
-
-// Loader Component
-
+type SectionType = "skill" | "project" | "experience" | "aboutInfo";
 
 const Admin = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<ModalType>(null);
-  const [editData, setEditData] = useState<EditData>({ section: null, data: null });
-  const [imagePreviews, setImagePreviews] = useState<{ [key: string]: string | null }>({});
+  const [editData, setEditData] = useState<EditData>({
+    section: null,
+    data: null,
+  });
+  const [imagePreviews, setImagePreviews] = useState<{
+    [key: string]: string | null;
+  }>({});
 
   const queryClient = useQueryClient();
 
   // Fetch data using useQuery
-  const {skills,  isLoadingSkills} = useGetSkills();
-  const {projects, isLoadingProjects} = useGetProjects()
-  const {experiences, isLoadingExperiences} = useGetExperiences()
-  const {aboutInfo, isLoadingAbout} = useGetAbout()
-
-
-
-
+  const { skills, isLoadingSkills } = useGetSkills();
+  const { projects, isLoadingProjects } = useGetProjects();
+  const { experiences, isLoadingExperiences } = useGetExperiences();
+  const { aboutInfo, isLoadingAbout } = useGetAbout();
 
   // Check if any query is loading
-  const isLoading = isLoadingSkills || isLoadingProjects || isLoadingExperiences || isLoadingAbout;
+  const isLoading =
+    isLoadingSkills ||
+    isLoadingProjects ||
+    isLoadingExperiences ||
+    isLoadingAbout;
 
   // Mutation for updating data
   const updateMutation = useMutation({
@@ -128,14 +95,22 @@ const Admin = () => {
       setImagePreviews({});
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || `Failed to update ${editData.section}.`;
+      const errorMessage =
+        error?.response?.data?.message ||
+        `Failed to update ${editData.section}.`;
       toast.error(errorMessage);
     },
   });
 
   // Mutation for deleting data
   const deleteMutation = useMutation({
-    mutationFn: async ({ section, id }: { section: SectionType; id: string }) => {
+    mutationFn: async ({
+      section,
+      id,
+    }: {
+      section: SectionType;
+      id: string;
+    }) => {
       if (!section) throw new Error("Section is required");
       return api.delete(`/${section}/${id}`);
     },
@@ -146,20 +121,22 @@ const Admin = () => {
       setEditData({ section: null, data: null });
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || `Failed to delete ${editData.section}.`;
+      const errorMessage =
+        error?.response?.data?.message ||
+        `Failed to delete ${editData.section}.`;
       toast.error(errorMessage);
     },
   });
 
   // Handle edit form changes
   const handleEditChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value, files } = e.target as HTMLInputElement;
     if (files && files[0]) {
       fileToBase64(files[0])
         .then((base64) => {
-          setEditData((prev) => ({
+          setEditData((prev: any) => ({
             ...prev,
             data: prev.data ? { ...prev.data, [name]: base64 } : prev.data,
           }));
@@ -173,7 +150,7 @@ const Admin = () => {
           toast.error("Failed to process image file");
         });
     } else {
-      setEditData((prev) => ({
+      setEditData((prev: any) => ({
         ...prev,
         data: prev.data
           ? {
@@ -190,7 +167,7 @@ const Admin = () => {
 
   // Handle clearing image previews
   const handleClearImage = (fieldName: string) => {
-    setEditData((prev) => ({
+    setEditData((prev: any) => ({
       ...prev,
       data: prev.data ? { ...prev.data, [fieldName]: undefined } : prev.data,
     }));
@@ -201,7 +178,7 @@ const Admin = () => {
   };
 
   // Handle update submission
-  const handleUpdateSubmit = async (e: React.FormEvent) => {
+  const handleUpdateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!editData.section || !editData.data) return;
@@ -209,16 +186,6 @@ const Admin = () => {
     // Basic validation
     if (editData.section === "experience") {
       const data = editData.data as Experience;
-      if (
-        !data.company ||
-        !data.role ||
-        !data.startDate ||
-        !data.endDate ||
-        !data.description
-      ) {
-        toast.error("All fields are required.");
-        return;
-      }
       const start = new Date(data.startDate);
       const end = new Date(data.endDate);
       if (start >= end) {
@@ -251,20 +218,31 @@ const Admin = () => {
         toast.error("Title and technologies are required.");
         return;
       }
-      const techArray = typeof data.technologies === "string"
-        ? data.technologies
-            .split(",")
-            .map((tech) => tech.trim())
-            .filter((tech) => tech)
-        : data.technologies;
+      // const techArray: string[] =
+      //   typeof data.technologies === "string"
+      //     ? data.technologies
+      //         .split(",")
+      //         .map((tech: string) => tech.trim())
+      //         .filter((tech: string) => tech)
+      //     : Array.isArray(data.technologies)
+      //     ? data.technologies
+      //     : [];
+
+      const techArray: string[] =
+        typeof data.technologies === "string"
+          ? (data.technologies as string)
+              .split(",")
+              .map((tech) => tech.trim())
+              .filter((tech) => tech)
+          : Array.isArray(data.technologies)
+          ? data.technologies
+          : [];
+
       if (techArray.length === 0) {
         toast.error("Please provide at least one technology.");
         return;
       }
-      if (
-        data.link &&
-        !/^https?:\/\/[^\s$.?#].[^\s]*$/.test(data.link)
-      ) {
+      if (data.link && !/^https?:\/\/[^\s$.?#].[^\s]*$/.test(data.link)) {
         toast.error("Please provide a valid URL for the link.");
         return;
       }
@@ -294,57 +272,124 @@ const Admin = () => {
   };
 
   // Open modal for specific action
+  // const openModal = (
+  //   type: ModalType,
+  //   section: "skills" | "projects" | "experiences" | "aboutInfo",
+  //   item: Skill | Project | Experience | About
+  // ) => {
+  //   const sectionMap: { [key in "skills" | "projects" | "experiences" | "aboutInfo"]: SectionType } = {
+  //     skills: "skill",
+  //     projects: "project",
+  //     experiences: "experience",
+  //     aboutInfo: "aboutInfo",
+  //   };
+
+  //   const normalizedSection: SectionType = sectionMap[section]; // Explicitly assert as SectionType
+
+  //   let data: Skill | Project | Experience | About;
+
+  //   if (normalizedSection === "project") {
+  //     data = {
+  //       ...item,
+  //       technologies: Array.isArray((item as Project).technologies)
+  //         ? (item as Project).technologies
+  //         : (item as Project).technologies || "",
+  //     } as Project;
+  //   } else {
+  //     data = { ...item };
+  //   }
+
+  //   setModalType(type);
+  //   setEditData({
+  //     section: normalizedSection,
+  //     data,
+  //   });
+  //   setImagePreviews({
+  //     heroImage: normalizedSection === "aboutInfo" ? (item as About).heroImage || null : null,
+  //     workImage: normalizedSection === "aboutInfo" ? (item as About).workImage || null : null,
+  //     image: normalizedSection === "project" ? ((item as Project).image || null) : null,
+  //     logo: normalizedSection === "skill" ? (item as Skill).logo || null : null,
+  //   });
+  //   setModalOpen(true);
+  // };
   const openModal = (
     type: ModalType,
     section: "skills" | "projects" | "experiences" | "aboutInfo",
     item: Skill | Project | Experience | About
   ) => {
-    const sectionMap: { [key: string]: SectionType } = {
+    const sectionMap: {
+      [key in "skills" | "projects" | "experiences" | "aboutInfo"]: SectionType;
+    } = {
       skills: "skill",
       projects: "project",
       experiences: "experience",
       aboutInfo: "aboutInfo",
     };
 
-    const normalizedSection = sectionMap[section] || section;
+    const normalizedSection = sectionMap[section];
 
-    let data: Skill | Project | Experience | About;
+    let editData: EditData;
 
-    if (normalizedSection === "project") {
-      data = {
-        ...item,
-        technologies: Array.isArray((item as Project).technologies)
-          ? (item as Project).technologies.join(", ")
-          : (item as Project).technologies || "",
-      } as Project;
-    } else {
-      data = { ...item };
+    switch (section) {
+      case "skills":
+        editData = { section: "skill", data: { ...item } as Skill };
+        break;
+      case "projects":
+        editData = {
+          section: "project",
+          data: {
+            ...item,
+            technologies: Array.isArray((item as Project).technologies)
+              ? (item as Project).technologies
+              : (item as Project).technologies || "",
+          } as Project,
+        };
+        break;
+      case "experiences":
+        editData = { section: "experience", data: { ...item } as Experience };
+        break;
+      case "aboutInfo":
+        editData = { section: "aboutInfo", data: { ...item } as About };
+        break;
+      default:
+        throw new Error("Invalid section");
     }
 
-    setModalType(type);
-    setEditData({
-      section: normalizedSection,
-      data,
-    });
+    setEditData(editData);
     setImagePreviews({
-      heroImage: normalizedSection === "aboutInfo" ? (item as About).heroImage || null : null,
-      workImage: normalizedSection === "aboutInfo" ? (item as About).workImage || null : null,
-      image: normalizedSection === "project" ? (item as Project).image || null : null,
+      heroImage:
+        normalizedSection === "aboutInfo"
+          ? (item as About).heroImage || null
+          : null,
+      workImage:
+        normalizedSection === "aboutInfo"
+          ? (item as About).workImage || null
+          : null,
+      image:
+        normalizedSection === "project"
+          ? (item as Project).image || null
+          : null,
       logo: normalizedSection === "skill" ? (item as Skill).logo || null : null,
     });
+    setModalType(type);
     setModalOpen(true);
   };
-
   return (
     <>
       {isLoading && <Loader />}
-      <div className={`min-h-screen bg-gray-100 py-10 px-4 ${isLoading ? 'opacity-50' : ''}`}>
-        <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold mb-6 text-center">Admin Dashboard</h2>
+      <div
+        className={`min-h-screen bg-gray-100 py-10 px-4 ${
+          isLoading ? "opacity-50" : ""
+        }`}
+      >
+        <div className='max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg'>
+          <h2 className='text-2xl font-bold mb-6 text-center'>
+            Admin Dashboard
+          </h2>
 
           {/* Modal */}
           <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-            <DialogContent className="sm:max-w-[425px] bg-white p-6 rounded-lg shadow-lg">
+            <DialogContent className='sm:max-w-[425px] bg-white p-6 rounded-lg shadow-lg'>
               {modalType === "update" && editData.section && (
                 <>
                   <DialogHeader>
@@ -353,234 +398,254 @@ const Admin = () => {
                       Update the details below.
                     </DialogDescription>
                   </DialogHeader>
-                  {editData.section === "aboutInfo" && editData.data ? (
-                    <div className="max-h-[70vh] overflow-y-auto space-y-4">
-                      <form onSubmit={handleUpdateSubmit} className="space-y-4">
+                  {editData.section === "aboutInfo" && editData.data && (
+                    <div className='max-h-[70vh] overflow-y-auto space-y-4'>
+                      <form onSubmit={handleUpdateSubmit} className='space-y-4'>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">
+                          <label className='block text-sm font-medium text-gray-700'>
                             Hero Image
                           </label>
                           <input
-                            type="file"
-                            name="heroImage"
+                            type='file'
+                            name='heroImage'
                             onChange={handleEditChange}
-                            className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-                            accept="image/jpeg,image/png,image/gif"
+                            className='mt-1 w-full p-2 border border-gray-300 rounded-md'
+                            accept='image/jpeg,image/png,image/gif'
                           />
                           {imagePreviews.heroImage && (
-                            <div className="relative">
+                            <div className='relative'>
                               <X
-                                className="absolute top-2 right-2 cursor-pointer"
+                                className='absolute top-2 right-2 cursor-pointer'
                                 onClick={() => handleClearImage("heroImage")}
-                                aria-label="Clear Hero Image"
+                                aria-label='Clear Hero Image'
                               />
                               <img
                                 src={imagePreviews.heroImage}
-                                alt="Hero Preview"
-                                className="mt-2 w-full h-40 object-cover rounded-md"
+                                alt='Hero Preview'
+                                className='mt-2 w-full h-40 object-cover rounded-md'
                               />
                             </div>
                           )}
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">
+                          <label className='block text-sm font-medium text-gray-700'>
                             Work Image
                           </label>
                           <input
-                            type="file"
-                            name="workImage"
+                            type='file'
+                            name='workImage'
                             onChange={handleEditChange}
-                            className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-                            accept="image/jpeg,image/png,image/gif"
+                            className='mt-1 w-full p-2 border border-gray-300 rounded-md'
+                            accept='image/jpeg,image/png,image/gif'
                           />
                           {imagePreviews.workImage && (
-                            <div className="relative">
+                            <div className='relative'>
                               <X
-                                className="absolute top-2 right-2 cursor-pointer"
+                                className='absolute top-2 right-2 cursor-pointer'
                                 onClick={() => handleClearImage("workImage")}
-                                aria-label="Clear Work Image"
+                                aria-label='Clear Work Image'
                               />
                               <img
                                 src={imagePreviews.workImage}
-                                alt="Work Preview"
-                                className="mt-2 w-full h-40 object-cover rounded-md"
+                                alt='Work Preview'
+                                className='mt-2 w-full h-40 object-cover rounded-md'
                               />
                             </div>
                           )}
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">
+                          <label className='block text-sm font-medium text-gray-700'>
                             Hero Title
                           </label>
                           <input
-                            type="text"
-                            name="heroTitle"
+                            type='text'
+                            name='heroTitle'
                             value={(editData.data as About).heroTitle || ""}
                             onChange={handleEditChange}
-                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                             required
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">
+                          <label className='block text-sm font-medium text-gray-700'>
                             Hero Description
                           </label>
                           <textarea
-                            name="heroDescription"
-                            value={(editData.data as About).heroDescription || ""}
+                            name='heroDescription'
+                            value={
+                              (editData.data as About).heroDescription || ""
+                            }
                             onChange={handleEditChange}
-                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                             rows={4}
                             required
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">
+                          <label className='block text-sm font-medium text-gray-700'>
                             About Description
                           </label>
                           <textarea
-                            name="aboutDescription"
-                            value={(editData.data as About).aboutDescription || ""}
+                            name='aboutDescription'
+                            value={
+                              (editData.data as About).aboutDescription || ""
+                            }
                             onChange={handleEditChange}
-                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                             rows={4}
                             required
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">
+                          <label className='block text-sm font-medium text-gray-700'>
                             Projects Completed
                           </label>
                           <input
-                            type="number"
-                            name="projectsCompleted"
-                            value={(editData.data as About).projectsCompleted ?? ""}
+                            type='number'
+                            name='projectsCompleted'
+                            value={
+                              (editData.data as About).projectsCompleted ?? ""
+                            }
                             onChange={handleEditChange}
-                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                             required
-                            min="0"
+                            min='0'
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">
+                          <label className='block text-sm font-medium text-gray-700'>
                             Years of Experience
                           </label>
                           <input
-                            type="number"
-                            name="yearsOfExperience"
-                            value={(editData.data as About).yearsOfExperience ?? ""}
+                            type='number'
+                            name='yearsOfExperience'
+                            value={
+                              (editData.data as About).yearsOfExperience ?? ""
+                            }
                             onChange={handleEditChange}
-                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                             required
-                            min="0"
+                            min='0'
                           />
                         </div>
                         <DialogFooter>
                           <button
-                            type="submit"
+                            type='submit'
                             disabled={updateMutation.isPending}
                             className={`py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                              updateMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
+                              updateMutation.isPending
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
                             }`}
                           >
-                            {updateMutation.isPending ? "Updating..." : "Update"}
+                            {updateMutation.isPending
+                              ? "Updating..."
+                              : "Update"}
                           </button>
                           <button
-                            type="button"
+                            type='button'
                             onClick={() => setModalOpen(false)}
-                            className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                            className='py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400'
                           >
                             Cancel
                           </button>
                         </DialogFooter>
                       </form>
                     </div>
-                  ) : (
-                    editData.section === "aboutInfo" && !editData.data && (
-                      <p>No data available</p>
-                    )
                   )}
                   {editData.section === "experience" && editData.data && (
-                    <form onSubmit={handleUpdateSubmit} className="space-y-4">
+                    <form onSubmit={handleUpdateSubmit} className='space-y-4'>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           Company
                         </label>
                         <input
-                          type="text"
-                          name="company"
+                          type='text'
+                          name='company'
                           value={(editData.data as Experience).company || ""}
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           Role
                         </label>
                         <input
-                          type="text"
-                          name="role"
+                          type='text'
+                          name='role'
                           value={(editData.data as Experience).role || ""}
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           Start Date
                         </label>
                         <input
-                          type="date"
-                          name="startDate"
-                          value={(editData.data as Experience).startDate || ""}
+                          type='date'
+                          name='startDate'
+                          value={
+                            (editData.data as Experience).startDate
+                              .toISOString()
+                              .split("T")[0] || ""
+                          }
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           End Date
                         </label>
                         <input
-                          type="date"
-                          name="endDate"
-                          value={(editData.data as Experience).endDate || ""}
+                          type='date'
+                          name='endDate'
+                          value={
+                            (editData.data as Experience).endDate
+                              .toISOString()
+                              .split("T")[0] || ""
+                          }
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           Description
                         </label>
                         <textarea
-                          name="description"
-                          value={(editData.data as Experience).description || ""}
+                          name='description'
+                          value={
+                            (editData.data as Experience).description || ""
+                          }
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                           rows={4}
                           required
                         />
                       </div>
                       <DialogFooter>
                         <button
-                          type="submit"
+                          type='submit'
                           disabled={updateMutation.isPending}
                           className={`py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                            updateMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
+                            updateMutation.isPending
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
                           }`}
                         >
                           {updateMutation.isPending ? "Updating..." : "Update"}
                         </button>
                         <button
-                          type="button"
+                          type='button'
                           onClick={() => setModalOpen(false)}
-                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                          className='py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400'
                         >
                           Cancel
                         </button>
@@ -588,89 +653,92 @@ const Admin = () => {
                     </form>
                   )}
                   {editData.section === "project" && editData.data && (
-                    <form onSubmit={handleUpdateSubmit} className="space-y-4">
+                    <form onSubmit={handleUpdateSubmit} className='space-y-4'>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           Title
                         </label>
                         <input
-                          type="text"
-                          name="title"
+                          type='text'
+                          name='title'
                           value={(editData.data as Project).title || ""}
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           Technologies (comma-separated)
                         </label>
                         <input
-                          type="text"
-                          name="technologies"
+                          type='text'
+                          name='technologies'
                           value={
-                            typeof (editData.data as Project).technologies === "string"
+                            typeof (editData.data as Project).technologies ===
+                            "string"
                               ? (editData.data as Project).technologies
-                              : (editData.data as Project).technologies.join(", ") || ""
+                              : ""
                           }
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           Link
                         </label>
                         <input
-                          type="url"
-                          name="link"
+                          type='url'
+                          name='link'
                           value={(editData.data as Project).link || ""}
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           Image
                         </label>
                         <input
-                          type="file"
-                          name="image"
+                          type='file'
+                          name='image'
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-                          accept="image/jpeg,image/png,image/gif"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md'
+                          accept='image/jpeg,image/png,image/gif'
                         />
                         {imagePreviews.image && (
-                          <div className="relative">
+                          <div className='relative'>
                             <X
-                              className="absolute top-2 right-2 cursor-pointer"
+                              className='absolute top-2 right-2 cursor-pointer'
                               onClick={() => handleClearImage("image")}
-                              aria-label="Clear Project Image"
+                              aria-label='Clear Project Image'
                             />
                             <img
                               src={imagePreviews.image}
-                              alt="Project Preview"
-                              className="mt-2 w-full h-40 object-cover rounded-md"
+                              alt='Project Preview'
+                              className='mt-2 w-full h-40 object-cover rounded-md'
                             />
                           </div>
                         )}
                       </div>
                       <DialogFooter>
                         <button
-                          type="submit"
+                          type='submit'
                           disabled={updateMutation.isPending}
                           className={`py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                            updateMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
+                            updateMutation.isPending
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
                           }`}
                         >
                           {updateMutation.isPending ? "Updating..." : "Update"}
                         </button>
                         <button
-                          type="button"
+                          type='button'
                           onClick={() => setModalOpen(false)}
-                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                          className='py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400'
                         >
                           Cancel
                         </button>
@@ -678,73 +746,75 @@ const Admin = () => {
                     </form>
                   )}
                   {editData.section === "skill" && editData.data && (
-                    <form onSubmit={handleUpdateSubmit} className="space-y-4">
+                    <form onSubmit={handleUpdateSubmit} className='space-y-4'>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           Title
                         </label>
                         <input
-                          type="text"
-                          name="title"
+                          type='text'
+                          name='title'
                           value={(editData.data as Skill).title || ""}
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           Description
                         </label>
                         <textarea
-                          name="description"
+                          name='description'
                           value={(editData.data as Skill).description || ""}
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500'
                           rows={4}
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className='block text-sm font-medium text-gray-700'>
                           Logo
                         </label>
                         <input
-                          type="file"
-                          name="logo"
+                          type='file'
+                          name='logo'
                           onChange={handleEditChange}
-                          className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-                          accept="image/jpeg,image/png,image/gif"
+                          className='mt-1 w-full p-2 border border-gray-300 rounded-md'
+                          accept='image/jpeg,image/png,image/gif'
                         />
                         {imagePreviews.logo && (
-                          <div className="relative">
+                          <div className='relative'>
                             <X
-                              className="absolute top-2 right-2 cursor-pointer"
+                              className='absolute top-2 right-2 cursor-pointer'
                               onClick={() => handleClearImage("logo")}
-                              aria-label="Clear Skill Logo"
+                              aria-label='Clear Skill Logo'
                             />
                             <img
                               src={imagePreviews.logo}
-                              alt="Skill Logo"
-                              className="mt-2 w-32 h-32 object-contain rounded-md"
+                              alt='Skill Logo'
+                              className='mt-2 w-32 h-32 object-contain rounded-md'
                             />
                           </div>
                         )}
                       </div>
                       <DialogFooter>
                         <button
-                          type="submit"
+                          type='submit'
                           disabled={updateMutation.isPending}
                           className={`py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                            updateMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
+                            updateMutation.isPending
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
                           }`}
                         >
                           {updateMutation.isPending ? "Updating..." : "Update"}
                         </button>
                         <button
-                          type="button"
+                          type='button'
                           onClick={() => setModalOpen(false)}
-                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                          className='py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400'
                         >
                           Cancel
                         </button>
@@ -758,7 +828,8 @@ const Admin = () => {
                   <DialogHeader>
                     <DialogTitle>Delete {editData.section}</DialogTitle>
                     <DialogDescription>
-                      Are you sure you want to delete this {editData.section} entry? This action cannot be undone.
+                      Are you sure you want to delete this {editData.section}{" "}
+                      entry? This action cannot be undone.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
@@ -766,14 +837,16 @@ const Admin = () => {
                       onClick={handleDelete}
                       disabled={deleteMutation.isPending}
                       className={`py-2 px-4 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                        deleteMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
+                        deleteMutation.isPending
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
                       }`}
                     >
                       {deleteMutation.isPending ? "Deleting..." : "Delete"}
                     </button>
                     <button
                       onClick={() => setModalOpen(false)}
-                      className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                      className='py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400'
                     >
                       Cancel
                     </button>
@@ -788,11 +861,12 @@ const Admin = () => {
                       Details of the selected entry.
                     </DialogDescription>
                   </DialogHeader>
-                  {editData.section === "aboutInfo" && editData.data ? (
-                    <div className="max-h-[70vh] overflow-y-auto space-y-4">
-                      <div className="space-y-4">
+                  {editData.section === "aboutInfo" && editData.data && (
+                    <div className='max-h-[70vh] overflow-y-auto space-y-4'>
+                      <div className='space-y-4'>
                         <p>
-                          <strong>Hero Title:</strong> {(editData.data as About).heroTitle || "N/A"}
+                          <strong>Hero Title:</strong>{" "}
+                          {(editData.data as About).heroTitle || "N/A"}
                         </p>
                         <p>
                           <strong>Hero Description:</strong>{" "}
@@ -815,8 +889,8 @@ const Admin = () => {
                             <strong>Hero Image:</strong>
                             <img
                               src={(editData.data as About).heroImage}
-                              alt="Hero Preview"
-                              className="mt-2 w-full h-40 object-cover rounded-md"
+                              alt='Hero Preview'
+                              className='mt-2 w-full h-40 object-cover rounded-md'
                             />
                           </div>
                         )}
@@ -825,8 +899,8 @@ const Admin = () => {
                             <strong>Work Image:</strong>
                             <img
                               src={(editData.data as About).workImage}
-                              alt="Work Preview"
-                              className="mt-2 w-full h-40 object-cover rounded-md"
+                              alt='Work Preview'
+                              className='mt-2 w-full h-40 object-cover rounded-md'
                             />
                           </div>
                         )}
@@ -834,40 +908,47 @@ const Admin = () => {
                       <DialogFooter>
                         <button
                           onClick={() => setModalOpen(false)}
-                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                          className='py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400'
                         >
                           Close
                         </button>
                       </DialogFooter>
                     </div>
-                  ) : (
-                    editData.section === "aboutInfo" && !editData.data && (
-                      <p>No data available</p>
-                    )
                   )}
                   {editData.section === "experience" && editData.data && (
-                    <div className="space-y-4">
+                    <div className='space-y-4'>
                       <p>
-                        <strong>Company:</strong> {(editData.data as Experience).company || "N/A"}
+                        <strong>Company:</strong>{" "}
+                        {(editData.data as Experience).company || "N/A"}
                       </p>
                       <p>
-                        <strong>Role:</strong> {(editData.data as Experience).role || "N/A"}
+                        <strong>Role:</strong>{" "}
+                        {(editData.data as Experience).role || "N/A"}
                       </p>
                       <p>
                         <strong>Start Date:</strong>{" "}
-                        {new Date((editData.data as Experience).startDate).toLocaleDateString() || "N/A"}
+                        {(editData.data as Experience).startDate instanceof Date
+                          ? (
+                              editData.data as Experience
+                            ).startDate.toLocaleDateString()
+                          : "N/A"}
                       </p>
                       <p>
                         <strong>End Date:</strong>{" "}
-                        {new Date((editData.data as Experience).endDate).toLocaleDateString() || "N/A"}
+                        {(editData.data as Experience).endDate instanceof Date
+                          ? (
+                              editData.data as Experience
+                            ).endDate.toLocaleDateString()
+                          : "N/A"}
                       </p>
                       <p>
-                        <strong>Description:</strong> {(editData.data as Experience).description || "N/A"}
+                        <strong>Description:</strong>{" "}
+                        {(editData.data as Experience).description || "N/A"}
                       </p>
                       <DialogFooter>
                         <button
                           onClick={() => setModalOpen(false)}
-                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                          className='py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400'
                         >
                           Close
                         </button>
@@ -875,24 +956,26 @@ const Admin = () => {
                     </div>
                   )}
                   {editData.section === "project" && editData.data && (
-                    <div className="space-y-4">
+                    <div className='space-y-4'>
                       <p>
-                        <strong>Title:</strong> {(editData.data as Project).title || "N/A"}
+                        <strong>Title:</strong>{" "}
+                        {(editData.data as Project).title || "N/A"}
                       </p>
                       <p>
                         <strong>Technologies:</strong>{" "}
-                        {typeof (editData.data as Project).technologies === "string"
+                        {typeof (editData.data as Project).technologies ===
+                        "string"
                           ? (editData.data as Project).technologies
-                          : (editData.data as Project).technologies.join(", ") || "N/A"}
+                          : "N/A"}
                       </p>
                       <p>
                         <strong>Link:</strong>{" "}
                         {(editData.data as Project).link ? (
                           <a
                             href={(editData.data as Project).link}
-                            className="text-blue-500 hover:underline"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            className='text-blue-500 hover:underline'
+                            target='_blank'
+                            rel='noopener noreferrer'
                           >
                             {(editData.data as Project).link}
                           </a>
@@ -900,20 +983,33 @@ const Admin = () => {
                           "N/A"
                         )}
                       </p>
+                      {/* {(editData.data as Project).image && (
+                        <div>
+                          <strong>Image:</strong>
+                          <img
+                            src={typeof (editData.data as Project).image === 'string' 
+                              ? (editData.data as Project).image 
+                              : ''}
+                            alt="Project Preview"
+                            className="mt-2 w-full h-40 object-cover rounded-md"
+                          />
+                        </div>
+                      )} */}
+
                       {(editData.data as Project).image && (
                         <div>
                           <strong>Image:</strong>
                           <img
-                            src={(editData.data as Project).image}
-                            alt="Project Preview"
-                            className="mt-2 w-full h-40 object-cover rounded-md"
+                            src={(editData.data as Project).image ?? undefined}
+                            alt='Project Preview'
+                            className='mt-2 w-full h-40 object-cover rounded-md'
                           />
                         </div>
                       )}
                       <DialogFooter>
                         <button
                           onClick={() => setModalOpen(false)}
-                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                          className='py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400'
                         >
                           Close
                         </button>
@@ -921,27 +1017,29 @@ const Admin = () => {
                     </div>
                   )}
                   {editData.section === "skill" && editData.data && (
-                    <div className="space-y-4">
+                    <div className='space-y-4'>
                       <p>
-                        <strong>Title:</strong> {(editData.data as Skill).title || "N/A"}
+                        <strong>Title:</strong>{" "}
+                        {(editData.data as Skill).title || "N/A"}
                       </p>
                       <p>
-                        <strong>Description:</strong> {(editData.data as Skill).description || "N/A"}
+                        <strong>Description:</strong>{" "}
+                        {(editData.data as Skill).description || "N/A"}
                       </p>
                       {(editData.data as Skill).logo && (
                         <div>
                           <strong>Logo:</strong>
                           <img
                             src={(editData.data as Skill).logo}
-                            alt="Skill Logo"
-                            className="mt-2 w-32 h-32 object-contain rounded-md"
+                            alt='Skill Logo'
+                            className='mt-2 w-32 h-32 object-contain rounded-md'
                           />
                         </div>
                       )}
                       <DialogFooter>
                         <button
                           onClick={() => setModalOpen(false)}
-                          className="py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                          className='py-2 px-4 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400'
                         >
                           Close
                         </button>
@@ -954,52 +1052,66 @@ const Admin = () => {
           </Dialog>
 
           {/* Experiences Table */}
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">Experiences</h3>
-            <table className="w-full border-collapse border border-gray-300">
+          <div className='mb-8'>
+            <h3 className='text-xl font-semibold mb-4'>Experiences</h3>
+            <table className='w-full border-collapse border border-gray-300'>
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 p-2">Company</th>
-                  <th className="border border-gray-300 p-2">Role</th>
-                  <th className="border border-gray-300 p-2">Start Date</th>
-                  <th className="border border-gray-300 p-2">End Date</th>
-                  <th className="border border-gray-300 p-2">Description</th>
-                  <th className="border border-gray-300 p-2">Actions</th>
+                <tr className='bg-gray-100'>
+                  <th className='border border-gray-300 p-2'>Company</th>
+                  <th className='border border-gray-300 p-2'>Role</th>
+                  <th className='border border-gray-300 p-2'>Start Date</th>
+                  <th className='border border-gray-300 p-2'>End Date</th>
+                  <th className='border border-gray-300 p-2'>Description</th>
+                  <th className='border border-gray-300 p-2'>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {experiences?.map((exp) => (
                   <tr key={exp._id}>
-                    <td className="border border-gray-300 p-2">{exp.company}</td>
-                    <td className="border border-gray-300 p-2">{exp.role}</td>
-                    <td className="border border-gray-300 p-2">
-                      {new Date(exp.startDate).toLocaleDateString()}
+                    <td className='border border-gray-300 p-2'>
+                      {exp.company}
                     </td>
-                    <td className="border border-gray-300 p-2">
-                      {new Date(exp.endDate).toLocaleDateString()}
+                    <td className='border border-gray-300 p-2'>{exp.role}</td>
+                    <td className='border border-gray-300 p-2'>
+                      {exp.startDate instanceof Date
+                        ? exp.startDate.toLocaleDateString()
+                        : "N/A"}
                     </td>
-                    <td className="border border-gray-300 p-2">{exp.description}</td>
-                    <td className="border border-gray-300 p-2">
+                    <td className='border border-gray-300 p-2'>
+                      {exp.endDate instanceof Date
+                        ? exp.endDate.toLocaleDateString()
+                        : "N/A"}
+                    </td>
+                    <td className='border border-gray-300 p-2'>
+                      {exp.description}
+                    </td>
+                    <td className='border border-gray-300 p-2'>
                       <DropdownMenu>
                         <DropdownMenuTrigger>
-                          <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                          <MoreHorizontal className='h-5 w-5 text-gray-500 hover:text-gray-700' />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuItem
-                            onClick={() => openModal("view", "experiences", exp)}
-                            className="text-green-500"
+                            onClick={() =>
+                              openModal("view", "experiences", exp)
+                            }
+                            className='text-green-500'
                           >
                             View
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => openModal("update", "experiences", exp)}
-                            className="text-blue-500"
+                            onClick={() =>
+                              openModal("update", "experiences", exp)
+                            }
+                            className='text-blue-500'
                           >
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => openModal("delete", "experiences", exp)}
-                            className="text-red-500"
+                            onClick={() =>
+                              openModal("delete", "experiences", exp)
+                            }
+                            className='text-red-500'
                           >
                             Delete
                           </DropdownMenuItem>
@@ -1013,42 +1125,64 @@ const Admin = () => {
           </div>
 
           {/* About Table */}
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">About</h3>
-            <table className="w-full border-collapse border border-gray-300">
+          <div className='mb-8'>
+            <h3 className='text-xl font-semibold mb-4'>About</h3>
+            <table className='w-full border-collapse border border-gray-300'>
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 p-2">Hero Title</th>
-                  <th className="border border-gray-300 p-2">Hero Description</th>
-                  <th className="border border-gray-300 p-2">About Description</th>
-                  <th className="border border-gray-300 p-2">Projects Completed</th>
-                  <th className="border border-gray-300 p-2">Years of Experience</th>
-                  <th className="border border-gray-300 p-2">Actions</th>
+                <tr className='bg-gray-100'>
+                  <th className='border border-gray-300 p-2'>Hero Title</th>
+                  <th className='border border-gray-300 p-2'>
+                    Hero Description
+                  </th>
+                  <th className='border border-gray-300 p-2'>
+                    About Description
+                  </th>
+                  <th className='border border-gray-300 p-2'>
+                    Projects Completed
+                  </th>
+                  <th className='border border-gray-300 p-2'>
+                    Years of Experience
+                  </th>
+                  <th className='border border-gray-300 p-2'>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {aboutInfo ? (
                   <tr>
-                    <td className="border border-gray-300 p-2">{aboutInfo.heroTitle || "N/A"}</td>
-                    <td className="border border-gray-300 p-2">{aboutInfo.heroDescription || "N/A"}</td>
-                    <td className="border border-gray-300 p-2">{aboutInfo.aboutDescription || "N/A"}</td>
-                    <td className="border border-gray-300 p-2">{aboutInfo.projectsCompleted ?? "N/A"}</td>
-                    <td className="border border-gray-300 p-2">{aboutInfo.yearsOfExperience ?? "N/A"}</td>
-                    <td className="border border-gray-300 p-2">
+                    <td className='border border-gray-300 p-2'>
+                      {aboutInfo.heroTitle || "N/A"}
+                    </td>
+                    <td className='border border-gray-300 p-2'>
+                      {aboutInfo.heroDescription || "N/A"}
+                    </td>
+                    <td className='border border-gray-300 p-2'>
+                      {aboutInfo.aboutDescription || "N/A"}
+                    </td>
+                    <td className='border border-gray-300 p-2'>
+                      {aboutInfo.projectsCompleted ?? "N/A"}
+                    </td>
+                    <td className='border border-gray-300 p-2'>
+                      {aboutInfo.yearsOfExperience ?? "N/A"}
+                    </td>
+                    <td className='border border-gray-300 p-2'>
                       <DropdownMenu>
                         <DropdownMenuTrigger>
-                          <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                          <MoreHorizontal className='h-5 w-5 text-gray-500 hover:text-gray-700' />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuItem
-                            onClick={() => openModal("view", "aboutInfo", aboutInfo)}
-                            className="text-green-500"
+                            onClick={() =>
+                              openModal("view", "aboutInfo", aboutInfo)
+                            }
+                            className='text-green-500'
                           >
                             View
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => openModal("update", "aboutInfo", aboutInfo)}
-                            className="text-blue-500"
+                            onClick={() =>
+                              openModal("update", "aboutInfo", aboutInfo)
+                            }
+                            className='text-blue-500'
                           >
                             Edit
                           </DropdownMenuItem>
@@ -1058,7 +1192,10 @@ const Admin = () => {
                   </tr>
                 ) : (
                   <tr>
-                    <td colSpan={6} className="border border-gray-300 p-2 text-center">
+                    <td
+                      colSpan={6}
+                      className='border border-gray-300 p-2 text-center'
+                    >
                       No About data available
                     </td>
                   </tr>
@@ -1068,33 +1205,35 @@ const Admin = () => {
           </div>
 
           {/* Projects Table */}
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">Projects</h3>
-            <table className="w-full border-collapse border border-gray-300">
+          <div className='mb-8'>
+            <h3 className='text-xl font-semibold mb-4'>Projects</h3>
+            <table className='w-full border-collapse border border-gray-300'>
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 p-2">Title</th>
-                  <th className="border border-gray-300 p-2">Technologies</th>
-                  <th className="border border-gray-300 p-2">Link</th>
-                  <th className="border border-gray-300 p-2">Actions</th>
+                <tr className='bg-gray-100'>
+                  <th className='border border-gray-300 p-2'>Title</th>
+                  <th className='border border-gray-300 p-2'>Technologies</th>
+                  <th className='border border-gray-300 p-2'>Link</th>
+                  <th className='border border-gray-300 p-2'>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {projects?.map((project) => (
                   <tr key={project._id}>
-                    <td className="border border-gray-300 p-2">{project.title}</td>
-                    <td className="border border-gray-300 p-2">
+                    <td className='border border-gray-300 p-2'>
+                      {project.title}
+                    </td>
+                    <td className='border border-gray-300 p-2'>
                       {typeof project.technologies === "string"
                         ? project.technologies
                         : project.technologies.join(", ")}
                     </td>
-                    <td className="border border-gray-300 p-2">
+                    <td className='border border-gray-300 p-2'>
                       {project.link ? (
                         <a
                           href={project.link}
-                          className="text-blue-500 hover:underline"
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          className='text-blue-500 hover:underline'
+                          target='_blank'
+                          rel='noopener noreferrer'
                         >
                           Link
                         </a>
@@ -1102,27 +1241,33 @@ const Admin = () => {
                         "N/A"
                       )}
                     </td>
-                    <td className="border border-gray-300 p-2">
+                    <td className='border border-gray-300 p-2'>
                       <DropdownMenu>
                         <DropdownMenuTrigger>
-                          <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                          <MoreHorizontal className='h-5 w-5 text-gray-500 hover:text-gray-700' />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuItem
-                            onClick={() => openModal("view", "projects", project)}
-                            className="text-green-500"
+                            onClick={() =>
+                              openModal("view", "projects", project)
+                            }
+                            className='text-green-500'
                           >
                             View
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => openModal("update", "projects", project)}
-                            className="text-blue-500"
+                            onClick={() =>
+                              openModal("update", "projects", project)
+                            }
+                            className='text-blue-500'
                           >
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => openModal("delete", "projects", project)}
-                            className="text-red-500"
+                            onClick={() =>
+                              openModal("delete", "projects", project)
+                            }
+                            className='text-red-500'
                           >
                             Delete
                           </DropdownMenuItem>
@@ -1137,41 +1282,45 @@ const Admin = () => {
 
           {/* Skills Table */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Skills</h3>
-            <table className="w-full border-collapse border border-gray-300">
+            <h3 className='text-xl font-semibold mb-4'>Skills</h3>
+            <table className='w-full border-collapse border border-gray-300'>
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 p-2">Title</th>
-                  <th className="border border-gray-300 p-2">Description</th>
-                  <th className="border border-gray-300 p-2">Actions</th>
+                <tr className='bg-gray-100'>
+                  <th className='border border-gray-300 p-2'>Title</th>
+                  <th className='border border-gray-300 p-2'>Description</th>
+                  <th className='border border-gray-300 p-2'>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {skills?.map((skill) => (
                   <tr key={skill._id}>
-                    <td className="border border-gray-300 p-2">{skill.title}</td>
-                    <td className="border border-gray-300 p-2">{skill.description}</td>
-                    <td className="border border-gray-300 p-2">
+                    <td className='border border-gray-300 p-2'>
+                      {skill.title}
+                    </td>
+                    <td className='border border-gray-300 p-2'>
+                      {skill.description}
+                    </td>
+                    <td className='border border-gray-300 p-2'>
                       <DropdownMenu>
                         <DropdownMenuTrigger>
-                          <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                          <MoreHorizontal className='h-5 w-5 text-gray-500 hover:text-gray-700' />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuItem
                             onClick={() => openModal("view", "skills", skill)}
-                            className="text-green-500"
+                            className='text-green-500'
                           >
                             View
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => openModal("update", "skills", skill)}
-                            className="text-blue-500"
+                            className='text-blue-500'
                           >
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => openModal("delete", "skills", skill)}
-                            className="text-red-500"
+                            className='text-red-500'
                           >
                             Delete
                           </DropdownMenuItem>
