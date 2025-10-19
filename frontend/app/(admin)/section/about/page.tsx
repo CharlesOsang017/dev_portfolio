@@ -264,7 +264,7 @@ const AboutForm = () => {
             />
 
             {/* Hero Description */}
-            <FormField
+            {/* <FormField
               control={form.control}
               name="heroDescription"
               render={({ field }) => (
@@ -280,7 +280,7 @@ const AboutForm = () => {
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             {/* About Description */}
             <FormField

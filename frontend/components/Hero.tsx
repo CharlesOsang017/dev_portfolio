@@ -118,7 +118,7 @@ const Hero = () => {
           </motion.h1>
 
           {/* Subtext */}
-          <motion.p
+          {/* <motion.p
             className="text-gray-300 text-base md:text-lg max-w-md"
             variants={childVariants}
           >
@@ -126,7 +126,7 @@ const Hero = () => {
               ? "Loading description..."
               : aboutInfo?.heroDescription ||
                 "I build high-performance, user-focused web experiences."}
-          </motion.p>
+          </motion.p> */}
 
           {/* Buttons */}
           <motion.div className="flex space-x-4" variants={childVariants}>
