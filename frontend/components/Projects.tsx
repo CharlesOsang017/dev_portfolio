@@ -15,7 +15,7 @@ interface projectProps {
   projects: Project[];
 }
 const Projects = ({ projects }: projectProps) => {
-  // const projects = [
+ 
   //   {
   //     id: 1,
   //     title: "School Management System",
@@ -84,7 +84,7 @@ const Projects = ({ projects }: projectProps) => {
       >
         Projects
       </motion.h1>
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-6 max-w-6xl w-full'>
+      <div className='px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-6 max-w-6xl w-full'>
         {projects?.map((project, index) => (
           <motion.div
             key={project._id}
