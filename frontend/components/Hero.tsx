@@ -77,7 +77,7 @@ const Hero = () => {
   const defaultHeroImage = heroImage;
 
   return (
-    <div>
+    <div className="overflow-hidden">
       <section
         ref={heroRef}
         id="home"

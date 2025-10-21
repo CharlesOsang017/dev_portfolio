@@ -92,7 +92,7 @@ const Experience = ({ experiences }: experienceProps) => {
           }
         }
       `}</style>
-      <div className='md:px-10 px-7 py-8 sm:py-12 md:py-16'>
+      <div className='md:px-8 py-8 sm:py-12 md:py-16'>
         <div className='max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mb-8 text-center animate-slide-up'>
           <h3 className='text-2xl sm:text-3xl md:text-4xl font-bold text-white'>
             Experience
@@ -103,7 +103,7 @@ const Experience = ({ experiences }: experienceProps) => {
             impactful projects.
           </p>
         </div>
-        <div className='max-w-6xl mx-auto px-4 sm:px-6 md:px-8 relative'>
+        <div className='max-w-6xl mx-auto sm:px-6 md:px-8 relative'>
           {experiences?.map((experience) => (
             <div key={experience._id}>
               <div className='timeline-line' />

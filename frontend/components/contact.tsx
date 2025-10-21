@@ -96,7 +96,7 @@ const ContactPage = () => {
   };
 
   return (
-    <section className='text-white min-h-screen py-16 px-10'>
+    <section className='text-white min-h-screen py-16'>
       <div className='max-w-6xl mx-auto'>
         <motion.div
           className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'
@@ -111,7 +111,7 @@ const ContactPage = () => {
               className='text-center lg:text-left'
               variants={itemVariants}
             >
-              <h1 className='text-3xl lg:text-4xl font-bold text-white mb-4'>
+              <h1 className='text-2xl lg:text-4xl font-bold text-white mb-4'>
                 Contact me for collaboration
               </h1>
               <p className='text-lg text-white leading-relaxed'>

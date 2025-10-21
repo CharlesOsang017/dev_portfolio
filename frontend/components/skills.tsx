@@ -66,7 +66,7 @@ const Skills = ({skills}: skillProps) => {
           transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
       `}</style>
-      <div className='px-8 md:px-10 sm:px-10 py-8 sm:py-12 md:py-16'>
+      <div className='px-4 md:px-10 sm:px-10 py-8 sm:py-12 md:py-16'>
         <div className='px-4 sm:px-6 md:px-8 mb-6 md:text-start text-center animate-slide-up'>
           <h3 className='text-2xl sm:text-3xl md:text-4xl font-semibold text-white'>
             Essential Tools I Use
@@ -80,7 +80,7 @@ const Skills = ({skills}: skillProps) => {
             exceptional, <br /> high-performing websites and applications
           </p>
         </div>
-        <div className='max-w-6xl mx-auto px-6 sm:px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6'>
+        <div className='max-w-6xl mx-auto sm:px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6'>
           {skills?.map((skill, index) => (
             <div
               key={skill._id}

@@ -84,7 +84,7 @@ const Projects = ({ projects }: projectProps) => {
       >
         Projects
       </motion.h1>
-      <div className='px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-6 max-w-6xl w-full'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-6 max-w-6xl w-full'>
         {projects?.map((project, index) => (
           <motion.div
             key={project._id}
@@ -112,7 +112,7 @@ const Projects = ({ projects }: projectProps) => {
               </div>
             )}
             {/* Content Section */}
-            <div className='p-6 flex flex-col flex-grow'>
+            <div className='flex flex-col flex-grow'>
               <div className='flex items-center justify-between mb-2'>
                 <h2 className='text-lg font-semibold text-white'>
                   {project.title}

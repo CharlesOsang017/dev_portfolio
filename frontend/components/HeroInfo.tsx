@@ -46,7 +46,7 @@ const HeroInfo = ({ aboutInfo }: { aboutInfo: AboutInfo }) => {
           transition: transform 0.3s ease;
         }
       `}</style>
-      <div className="sm:px-6 md:px-20 px-20 md:mb-30 md:max-w-[69rem] bg-gradient-to-br from-zinc-800 to-gray-900 py-2 md:py-6 rounded-2xl animate-slide-up">
+      <div className="sm:px-6 md:px-6 px-6 md:mb-30 md:max-w-[69rem] bg-gradient-to-br from-zinc-800 to-gray-900 py-2 md:py-6 rounded-2xl animate-slide-up">
         <div className="max-w-3xl">
           <p className="text-sm sm:text-base md:text-lg text-gray-200">
             {aboutInfo?.aboutDescription || "Welcome! I'm a professional software developer."}
