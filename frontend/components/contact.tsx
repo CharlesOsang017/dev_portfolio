@@ -96,7 +96,7 @@ const ContactPage = () => {
   };
 
   return (
-    <section className='text-white min-h-screen py-16 px-4'>
+    <section className='text-white min-h-screen py-16 px-10'>
       <div className='max-w-6xl mx-auto'>
         <motion.div
           className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'
